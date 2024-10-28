@@ -2,85 +2,80 @@ import React, { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash, faSortAlphaAsc, faSortNumericAsc, faEllipsisVertical } from '@fortawesome/free-solid-svg-icons';
 import UploadExcelPopup from '../components/UploadExcelPopup';
-import { api } from '../API/api';
+import { useNavigate } from "react-router-dom";
+import { useGetFiles, useDeleteFile, useRenameFile, useUploadFile } from '../hooks/FileHooks.js';
 
+export function File({ file }) {
+  const navigate = useNavigate();
+  const loadProductPage = () => {
+    navigate("/productpage", { state: { file } });
+  }
+  return (
+    <div>
+      <button onClick={loadProductPage}>
+        {file.name}
+      </button>
+    </div>
+  )
+}
 
 function Dashboard() {
-  const [dropdownOpen, setDropdownOpen] = useState(null);
-  const [files, setFiles] = useState([]);
-  const [selectedFiles, setSelectedFiles] = useState([]);
+  const { files, isLoading: isLoadingFiles, refreshItems } = useGetFiles();
+  const { rename, isLoading: isLoadingRename } = useRenameFile(refreshItems);
+  const { remove, isLoading: isLoadingDelete } = useDeleteFile(refreshItems);
+  const { upload, isLoading: isLoadingUpload } = useUploadFile(refreshItems);
+
   const [renameFileId, setRenameFileId] = useState(null);
-  const [newFileName, setNewFileName] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [renameFileName, setRenameFileName] = useState("");
+
+  const [dropdownOpen, setDropdownOpen] = useState(null);
+  const [selectedFiles, setSelectedFiles] = useState([]);
   const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(null);
+      }
+    };
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, []);
+
+  const handleDelete = async () => {
+    try {
+      await Promise.all(selectedFiles.map(fileId => remove(fileId)));      
+      setSelectedFiles([]);
+    }
+    catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleRename = async (fileId) => {
+    await rename(fileId, renameFileName);
+    setRenameFileId(null);
+    setRenameFileName("");
+  }
 
   const toggleDropdown = (index) => {
     setDropdownOpen(dropdownOpen === index ? null : index);
   };
 
-  const handleRenameClick = (fileId, currentName) => {
+  const showRenameInput = (fileId) => {
     setRenameFileId(fileId);
-    setNewFileName(currentName);
-  };
+  }
 
-  const handleRenameChange = (event) => {
-    setNewFileName(event.target.value);
-  };
-
-  const handleRenameSubmit = async (fileId) => {
-    if (!newFileName) return;
-
-    try {
-      const response = await api.renameFile(fileId, newFileName);
-
-      if (response.ok) {
-        setFiles((prevFiles) =>
-          prevFiles.map((file) =>
-            file.id === fileId ? { ...file, name: newFileName } : file
-          )
-        );
-        setRenameFileId(null);
-      } else {
-        console.error('Error renaming file');
-      }
-    } catch (error) {
-      console.error('Error renaming file', error);
+  const handleSelectAllFiles = (e) => {
+    if (e.target.checked) {
+      setSelectedFiles(files.map(file => file.id));
     }
-  };
-
-  const handleClickOutside = (event) => {
-    if (dropdownRefs.current.some(ref => ref && !ref.contains(event.target))) {
-      setDropdownOpen(null);
+    else {
+      setSelectedFiles([]);
     }
-  };
-
-  const fetchFiles = async () => {
-    setLoading(true);
-    try {
-      const response = await api.getFiles();
-      if (response.ok) {
-        const data = await response.json();
-        setFiles(data);
-      } else {
-        console.error('Error fetching files');
-      }
-    } catch (error) {
-      console.error('Error fetching files', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchFiles();
-  }, []);
-
-  useEffect(() => {
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
+  }
 
   const handleSelectFile = (fileId) => {
     setSelectedFiles((prevSelectedFiles) =>
@@ -88,31 +83,6 @@ function Dashboard() {
         ? prevSelectedFiles.filter((id) => id !== fileId)
         : [...prevSelectedFiles, fileId]
     );
-  };
-
-  const handleDeleteFiles = async () => {
-    const confirmDelete = window.confirm('Are you sure you want to delete the selected files?');
-    if (!confirmDelete) return;
-
-    try {
-      for (const fileId of selectedFiles) {
-        const response = await api.deleteFile(fileId);
-
-        if (response.ok) {
-          setFiles((prevFiles) => prevFiles.filter((file) => file.id !== fileId));
-        } else {
-          console.error('Error deleting file with id:', fileId);
-        }
-      }
-
-      setSelectedFiles([]);
-    } catch (error) {
-      console.error('Error deleting files:', error);
-    }
-  };
-
-  const handleFileUploaded = () => {
-    fetchFiles();
   };
 
   return (
@@ -127,24 +97,24 @@ function Dashboard() {
                 placeholder="Search for file..."
               />
               <div className="d-flex align-items-center">
-                <UploadExcelPopup onFileUploaded={handleFileUploaded} />
-                <button className="btn btn-danger" onClick={handleDeleteFiles} disabled={selectedFiles.length === 0}>
-                  <FontAwesomeIcon icon={faTrash} />
+                <UploadExcelPopup uploadFile={ upload } isLoading={isLoadingUpload}/>
+                <button className="btn btn-danger" onClick={handleDelete} disabled={selectedFiles.length === 0 || isLoadingDelete}>
+                  {isLoadingDelete ? <span className="spinner-border spinner-border-sm ms-2"></span> : <FontAwesomeIcon icon={faTrash} />}
                 </button>
               </div>
             </div>
-            {loading ? (
+            {isLoadingFiles ? (
               <div className="text-center">
                 <div className="spinner-border" role="status">
                   <span className="visually-hidden">Loading...</span>
                 </div>
               </div>
             ) : (
-              <table className="table table-auto table-hover align-middle">
+              <table className="table table-auto align-middle">
                 <thead>
                   <tr>
                     <th scope="col">
-                      <input type="checkbox" className="me-2" />
+                      <input type="checkbox" className="me-2" onClick={handleSelectAllFiles} checked={selectedFiles.length === files.length && files.length > 0} />
                     </th>
                     <th scope="col">
                       File Name <FontAwesomeIcon icon={faSortAlphaAsc} />
@@ -159,7 +129,7 @@ function Dashboard() {
                   {files.length > 0 ? (
                     files.map((file, index) => (
                       <tr key={file.id}>
-                        <td>
+                        <td >
                           <input
                             type="checkbox"
                             className="me-2"
@@ -167,23 +137,25 @@ function Dashboard() {
                             onChange={() => handleSelectFile(file.id)}
                           />
                         </td>
-                        <td>
-                          {renameFileId === file.id ? (
+                        {renameFileId === file.id ? (
+                          <td className='h-75'>
                             <input
                               type="text"
-                              value={newFileName}
-                              onChange={handleRenameChange}
-                              onBlur={() => handleRenameSubmit(file.id)}
+                              value={renameFileName}
+                              onChange={(e) => setRenameFileName(e.target.value)}
+                              onBlur={() => handleRename(file.id)}
                               onKeyDown={(e) => {
-                                if (e.key === 'Enter') handleRenameSubmit(file.id);
+                                if (e.key === 'Enter') handleRename(file.id);
                               }}
                               autoFocus
                               className="form-control"
                             />
-                          ) : (
-                            file.name
-                          )}
-                        </td>
+                          </td>
+                        ) : (
+                          <td>
+                            <File file={file} ></File>
+                          </td>
+                        )}
                         <td>{new Date(file.lastUpdated).toLocaleDateString()}</td>
                         <td className="d-flex justify-content-end">
                           <div className="dropdown" ref={dropdownRef}>
@@ -193,9 +165,9 @@ function Dashboard() {
                             {dropdownOpen === index && (
                               <div
                                 className="dropdown-menu show"
-                                style={{ position: 'absolute', padding: '5px 10px', width: 'auto', minWidth: '120px' }}
+                                style={{ maxWidth: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}
                               >
-                                <button className="dropdown-item" onClick={() => handleRenameClick(file.id, file.name)}>
+                                <button className="dropdown-item" onClick={() => showRenameInput(file.id)} disabled={isLoadingRename}>
                                   Rename
                                 </button>
                                 <button className="dropdown-item" onClick={() => console.log('Export:', file.name)}>

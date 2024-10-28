@@ -1,9 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUpload } from '@fortawesome/free-solid-svg-icons';
-import { api } from '../API/api';
 
-function UploadExcelPopup({ onFileUploaded }) {
+export default function UploadExcelPopup({ uploadFile, isLoading }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedFileName, setSelectedFileName] = useState("");
   const fileInputRef = useRef(null);
@@ -39,27 +38,17 @@ function UploadExcelPopup({ onFileUploaded }) {
     fileInputRef.current.click();
   };
 
-  const uploadFile = async () => {
+  const handleUploadFile = async () => {
     if (selectedFile) {
       const formData = new FormData();
       formData.append("file", selectedFile);
-
       try {
-        const response = await api.uploadFile(formData);
-        if (response.ok) {
-          console.log("File uploaded successfully");
-          handleClose();
-          alert("File successfully uploaded");
-          onFileUploaded();
-        } else {
-          alert("File upload failed");
-        }
-      } catch (error) {
-        console.error("Error uploading file:", error);
-        alert("An error occurred while uploading the file");
+        await uploadFile(formData);
+        handleClose();
       }
-    } else {
-      alert("No file selected for upload");
+      catch (error) {
+        console.error("Error uploading file:", error);
+      }
     }
   };
 
@@ -88,6 +77,7 @@ function UploadExcelPopup({ onFileUploaded }) {
                 data-bs-dismiss="modal"
                 aria-label="Close"
                 onClick={handleClose}
+                disabled={isLoading}
               ></button>
             </div>
             <div className="modal-body p-4">
@@ -97,7 +87,7 @@ function UploadExcelPopup({ onFileUploaded }) {
               <p>Click the button below to upload an Excel file</p>
               <div className="upload-section d-flex justify-content-center align-items-center p-4 rounded">
                 <div className="text-center">
-                  <button type="button" className="btn" onClick={triggerFileInput}>
+                  <button type="button" className="btn" onClick={triggerFileInput} disabled={isLoading}>
                     <i className="fa-solid fa-upload"></i>
                     <p className="icon-text m-t-5 fs-6">{selectedFileName || "Select Excel File"}</p>
                   </button>
@@ -117,12 +107,17 @@ function UploadExcelPopup({ onFileUploaded }) {
                 type="button"
                 className="btn btn-secondary flex-grow-1"
                 onClick={handleClose}
+                disabled={isLoading}
               >
                 Close
               </button>
-
-              <button type="button" className="btn btn-primary flex-grow-1" onClick={uploadFile}>
-                Upload
+              <button type="button" className="btn btn-primary flex-grow-1" onClick={handleUploadFile} disabled={!selectedFile || isLoading}
+              >
+                {isLoading ? (
+                  <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                ) : (
+                  'Upload'
+                )}
               </button>
             </div>
           </div>
@@ -132,4 +127,3 @@ function UploadExcelPopup({ onFileUploaded }) {
   );
 }
 
-export default UploadExcelPopup;
