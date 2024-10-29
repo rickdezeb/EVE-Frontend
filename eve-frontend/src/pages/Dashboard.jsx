@@ -5,21 +5,22 @@ import UploadExcelPopup from '../components/UploadExcelPopup';
 import { useNavigate } from "react-router-dom";
 import { useGetFiles, useDeleteFile, useRenameFile, useUploadFile } from '../hooks/FileHooks.js';
 
-export function File({ file }) {
-  const navigate = useNavigate();
-  const loadProductPage = () => {
-    navigate("/productpage", { state: { file } });
-  }
+export function File({ file, onFileClick }) {
   return (
     <div>
-      <button onClick={loadProductPage}>
+      <span
+        onClick={onFileClick}
+        className="text-primary"
+        style={{ cursor: 'pointer' }}
+      >
         {file.name}
-      </button>
+      </span>
     </div>
   )
 }
 
 function Dashboard() {
+  const navigate = useNavigate();
   const { files, isLoading: isLoadingFiles, refreshItems } = useGetFiles();
   const { rename, isLoading: isLoadingRename } = useRenameFile(refreshItems);
   const { remove, isLoading: isLoadingDelete } = useDeleteFile(refreshItems);
@@ -48,34 +49,35 @@ function Dashboard() {
     try {
       await Promise.all(selectedFiles.map(fileId => remove(fileId)));      
       setSelectedFiles([]);
-    }
-    catch (error) {
+    } catch (error) {
       console.error(error);
     }
   };
 
   const handleRename = async (fileId) => {
+    if (renameFileName.trim() === "") return;
     await rename(fileId, renameFileName);
     setRenameFileId(null);
     setRenameFileName("");
-  }
+  };
 
   const toggleDropdown = (index) => {
     setDropdownOpen(dropdownOpen === index ? null : index);
   };
 
-  const showRenameInput = (fileId) => {
+  const showRenameInput = (fileId, currentName) => {
+    console.log(fileId, currentName);
     setRenameFileId(fileId);
-  }
+    setRenameFileName(currentName);
+  };
 
   const handleSelectAllFiles = (e) => {
     if (e.target.checked) {
       setSelectedFiles(files.map(file => file.id));
-    }
-    else {
+    } else {
       setSelectedFiles([]);
     }
-  }
+  };
 
   const handleSelectFile = (fileId) => {
     setSelectedFiles((prevSelectedFiles) =>
@@ -85,19 +87,24 @@ function Dashboard() {
     );
   };
 
+  const loadProductPage = (file) => {
+    navigate("/productpage", { state: { file } });
+  }
+
   return (
     <main className="container">
       <div className="card mb-3">
         <div className="card-body">
           <div className="mb-4 d-flex flex-column">
-            <div className="d-flex flex-row mb-4">
+            <div className="d-flex flex-row-reverse mb-4">
               <input
                 type="text"
                 className="form-control me-2"
                 placeholder="Search for file..."
+                hidden
               />
               <div className="d-flex align-items-center">
-                <UploadExcelPopup uploadFile={ upload } isLoading={isLoadingUpload}/>
+                <UploadExcelPopup uploadFile={upload} isLoading={isLoadingUpload} />
                 <button className="btn btn-danger" onClick={handleDelete} disabled={selectedFiles.length === 0 || isLoadingDelete}>
                   {isLoadingDelete ? <span className="spinner-border spinner-border-sm ms-2"></span> : <FontAwesomeIcon icon={faTrash} />}
                 </button>
@@ -114,13 +121,13 @@ function Dashboard() {
                 <thead>
                   <tr>
                     <th scope="col">
-                      <input type="checkbox" className="me-2" onClick={handleSelectAllFiles} checked={selectedFiles.length === files.length && files.length > 0} />
+                      <input type="checkbox" className="me-2" onChange={handleSelectAllFiles} checked={selectedFiles.length === files.length && files.length > 0} />
+                    </th>
+                    <th scope="col" >
+                      File Name <FontAwesomeIcon icon={faSortAlphaAsc} hidden/>
                     </th>
                     <th scope="col">
-                      File Name <FontAwesomeIcon icon={faSortAlphaAsc} />
-                    </th>
-                    <th scope="col">
-                      Last Updated <FontAwesomeIcon icon={faSortNumericAsc} />
+                      Last Updated <FontAwesomeIcon icon={faSortNumericAsc} hidden/>
                     </th>
                     <th scope="col"></th>
                   </tr>
@@ -129,7 +136,7 @@ function Dashboard() {
                   {files.length > 0 ? (
                     files.map((file, index) => (
                       <tr key={file.id}>
-                        <td >
+                        <td>
                           <input
                             type="checkbox"
                             className="me-2"
@@ -153,29 +160,26 @@ function Dashboard() {
                           </td>
                         ) : (
                           <td>
-                            <File file={file} ></File>
+                            <File file={file} onFileClick={() => loadProductPage(file)} />
                           </td>
                         )}
                         <td>{new Date(file.lastUpdated).toLocaleDateString()}</td>
-                        <td className="d-flex justify-content-end">
-                          <div className="dropdown" ref={dropdownRef}>
+                        <td className="text-end">
                             <button className="btn btn-link text-black p-0" onClick={() => toggleDropdown(index)}>
                               <FontAwesomeIcon icon={faEllipsisVertical} />
                             </button>
                             {dropdownOpen === index && (
-                              <div
-                                className="dropdown-menu show"
-                                style={{ maxWidth: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}
-                              >
-                                <button className="dropdown-item" onClick={() => showRenameInput(file.id)} disabled={isLoadingRename}>
+                          <div className="dropdown" ref={dropdownRef}>
+                              <div className="dropdown-menu show">
+                                <button className="dropdown-item" onClick={() => showRenameInput(file.id, file.name)} disabled={isLoadingRename}>
                                   Rename
                                 </button>
-                                <button className="dropdown-item" onClick={() => console.log('Export:', file.name)}>
+                                <button className="dropdown-item" onClick={() => console.log('Export:', file.name)} hidden>
                                   Export
                                 </button>
                               </div>
-                            )}
                           </div>
+                            )}
                         </td>
                       </tr>
                     ))
