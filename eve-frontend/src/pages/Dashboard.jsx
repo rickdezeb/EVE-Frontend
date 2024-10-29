@@ -55,6 +55,7 @@ function Dashboard() {
   };
 
   const handleRename = async (fileId) => {
+    if (renameFileName.trim() === "") return;
     await rename(fileId, renameFileName);
     setRenameFileId(null);
     setRenameFileName("");
@@ -65,6 +66,7 @@ function Dashboard() {
   };
 
   const showRenameInput = (fileId, currentName) => {
+    console.log(fileId, currentName);
     setRenameFileId(fileId);
     setRenameFileName(currentName);
   };
@@ -94,11 +96,12 @@ function Dashboard() {
       <div className="card mb-3">
         <div className="card-body">
           <div className="mb-4 d-flex flex-column">
-            <div className="d-flex flex-row mb-4">
+            <div className="d-flex flex-row-reverse mb-4">
               <input
                 type="text"
                 className="form-control me-2"
                 placeholder="Search for file..."
+                hidden
               />
               <div className="d-flex align-items-center">
                 <UploadExcelPopup uploadFile={upload} isLoading={isLoadingUpload} />
@@ -118,13 +121,13 @@ function Dashboard() {
                 <thead>
                   <tr>
                     <th scope="col">
-                      <input type="checkbox" className="me-2" onClick={handleSelectAllFiles} checked={selectedFiles.length === files.length && files.length > 0} />
+                      <input type="checkbox" className="me-2" onChange={handleSelectAllFiles} checked={selectedFiles.length === files.length && files.length > 0} />
+                    </th>
+                    <th scope="col" >
+                      File Name <FontAwesomeIcon icon={faSortAlphaAsc} hidden/>
                     </th>
                     <th scope="col">
-                      File Name <FontAwesomeIcon icon={faSortAlphaAsc} />
-                    </th>
-                    <th scope="col">
-                      Last Updated <FontAwesomeIcon icon={faSortNumericAsc} />
+                      Last Updated <FontAwesomeIcon icon={faSortNumericAsc} hidden/>
                     </th>
                     <th scope="col"></th>
                   </tr>
@@ -162,21 +165,21 @@ function Dashboard() {
                         )}
                         <td>{new Date(file.lastUpdated).toLocaleDateString()}</td>
                         <td className="text-end">
-                          <div className="dropdown" ref={dropdownRef}>
                             <button className="btn btn-link text-black p-0" onClick={() => toggleDropdown(index)}>
                               <FontAwesomeIcon icon={faEllipsisVertical} />
                             </button>
                             {dropdownOpen === index && (
+                          <div className="dropdown" ref={dropdownRef}>
                               <div className="dropdown-menu show">
                                 <button className="dropdown-item" onClick={() => showRenameInput(file.id, file.name)} disabled={isLoadingRename}>
                                   Rename
                                 </button>
-                                <button className="dropdown-item" onClick={() => console.log('Export:', file.name)}>
+                                <button className="dropdown-item" onClick={() => console.log('Export:', file.name)} hidden>
                                   Export
                                 </button>
                               </div>
-                            )}
                           </div>
+                            )}
                         </td>
                       </tr>
                     ))

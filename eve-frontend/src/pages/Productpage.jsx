@@ -77,7 +77,7 @@ export default function ProductPage() {
           <div className="d-flex justify-content-between align-items-center mb-4">
             <h4>{file?.name}</h4>
             <div className="d-flex">
-              <button className="btn btn-primary me-2">
+              <button className="btn btn-primary me-2" hidden>
                 <FontAwesomeIcon icon={faDownload} className="text-white" />
               </button>
               <button type="button" className="btn btn-primary me-2" onClick={handleAddProduct}>
@@ -93,8 +93,8 @@ export default function ProductPage() {
             <thead>
               <tr>
                 <th scope="col"><input type="checkbox" className="me-2" onChange={handleSelectAllProducts} checked={selectedProducts.length === products.length && products.length > 0} /></th>
-                <th scope="col">Product Identifier <FontAwesomeIcon icon={faSortAlphaAsc} /></th>
-                <th scope="col">Last Updated <FontAwesomeIcon icon={faSortNumericAsc} /></th>
+                <th scope="col">Product Identifier <FontAwesomeIcon icon={faSortAlphaAsc} hidden/></th>
+                <th scope="col">Last Updated <FontAwesomeIcon icon={faSortNumericAsc} hidden/></th>
                 <th scope="col"></th>
               </tr>
             </thead>

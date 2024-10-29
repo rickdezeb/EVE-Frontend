@@ -33,14 +33,14 @@ function Navbar() {
                                         state={file ? { file } : {}}
                                         style={{ color: 'white' }}
                                     >
-                                        Product
+                                        File
                                     </NavLink>
                                 </li>
                             )}
                             {isEdit && (
                                 <li className="breadcrumb-item">
                                     <NavLink to="/editpage" state={state} style={{ color: 'white' }}>
-                                        Edit
+                                        Product
                                     </NavLink>
                                 </li>
                             )}
