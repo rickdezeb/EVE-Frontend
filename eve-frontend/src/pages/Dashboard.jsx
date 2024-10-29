@@ -5,17 +5,22 @@ import UploadExcelPopup from '../components/UploadExcelPopup';
 import { useNavigate } from "react-router-dom";
 import { useGetFiles, useDeleteFile, useRenameFile, useUploadFile } from '../hooks/FileHooks.js';
 
-export function File({ file, onClick }) {
+export function File({ file, onFileClick }) {
   return (
     <div>
-      <span onClick={onClick} className="text-primary" style={{ cursor: 'pointer' }}>
+      <span
+        onClick={onFileClick}
+        className="text-primary"
+        style={{ cursor: 'pointer' }}
+      >
         {file.name}
       </span>
     </div>
-  );
+  )
 }
 
 function Dashboard() {
+  const navigate = useNavigate();
   const { files, isLoading: isLoadingFiles, refreshItems } = useGetFiles();
   const { rename, isLoading: isLoadingRename } = useRenameFile(refreshItems);
   const { remove, isLoading: isLoadingDelete } = useDeleteFile(refreshItems);
@@ -44,8 +49,7 @@ function Dashboard() {
     try {
       await Promise.all(selectedFiles.map(fileId => remove(fileId)));      
       setSelectedFiles([]);
-    }
-    catch (error) {
+    } catch (error) {
       console.error(error);
     }
   };
@@ -54,25 +58,24 @@ function Dashboard() {
     await rename(fileId, renameFileName);
     setRenameFileId(null);
     setRenameFileName("");
-  }
+  };
 
   const toggleDropdown = (index) => {
     setDropdownOpen(dropdownOpen === index ? null : index);
   };
 
-  const showRenameInput = (fileId, currentFileName) => {
+  const showRenameInput = (fileId, currentName) => {
     setRenameFileId(fileId);
-    setRenameFileName(currentFileName);
-  }
+    setRenameFileName(currentName);
+  };
 
   const handleSelectAllFiles = (e) => {
     if (e.target.checked) {
       setSelectedFiles(files.map(file => file.id));
-    }
-    else {
+    } else {
       setSelectedFiles([]);
     }
-  }
+  };
 
   const handleSelectFile = (fileId) => {
     setSelectedFiles((prevSelectedFiles) =>
@@ -81,6 +84,10 @@ function Dashboard() {
         : [...prevSelectedFiles, fileId]
     );
   };
+
+  const loadProductPage = (file) => {
+    navigate("/productpage", { state: { file } });
+  }
 
   return (
     <main className="container">
@@ -150,7 +157,7 @@ function Dashboard() {
                           </td>
                         ) : (
                           <td>
-                            <File file={file} onClick={() => showRenameInput(file.id, file.name)} />
+                            <File file={file} onFileClick={() => loadProductPage(file)} />
                           </td>
                         )}
                         <td>{new Date(file.lastUpdated).toLocaleDateString()}</td>
