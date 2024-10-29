@@ -5,18 +5,14 @@ import UploadExcelPopup from '../components/UploadExcelPopup';
 import { useNavigate } from "react-router-dom";
 import { useGetFiles, useDeleteFile, useRenameFile, useUploadFile } from '../hooks/FileHooks.js';
 
-export function File({ file }) {
-  const navigate = useNavigate();
-  const loadProductPage = () => {
-    navigate("/productpage", { state: { file } });
-  }
+export function File({ file, onClick }) {
   return (
     <div>
-      <button onClick={loadProductPage}>
+      <span onClick={onClick} className="text-primary" style={{ cursor: 'pointer' }}>
         {file.name}
-      </button>
+      </span>
     </div>
-  )
+  );
 }
 
 function Dashboard() {
@@ -64,8 +60,9 @@ function Dashboard() {
     setDropdownOpen(dropdownOpen === index ? null : index);
   };
 
-  const showRenameInput = (fileId) => {
+  const showRenameInput = (fileId, currentFileName) => {
     setRenameFileId(fileId);
+    setRenameFileName(currentFileName);
   }
 
   const handleSelectAllFiles = (e) => {
@@ -97,7 +94,7 @@ function Dashboard() {
                 placeholder="Search for file..."
               />
               <div className="d-flex align-items-center">
-                <UploadExcelPopup uploadFile={ upload } isLoading={isLoadingUpload}/>
+                <UploadExcelPopup uploadFile={upload} isLoading={isLoadingUpload} />
                 <button className="btn btn-danger" onClick={handleDelete} disabled={selectedFiles.length === 0 || isLoadingDelete}>
                   {isLoadingDelete ? <span className="spinner-border spinner-border-sm ms-2"></span> : <FontAwesomeIcon icon={faTrash} />}
                 </button>
@@ -129,7 +126,7 @@ function Dashboard() {
                   {files.length > 0 ? (
                     files.map((file, index) => (
                       <tr key={file.id}>
-                        <td >
+                        <td>
                           <input
                             type="checkbox"
                             className="me-2"
@@ -153,21 +150,18 @@ function Dashboard() {
                           </td>
                         ) : (
                           <td>
-                            <File file={file} ></File>
+                            <File file={file} onClick={() => showRenameInput(file.id, file.name)} />
                           </td>
                         )}
                         <td>{new Date(file.lastUpdated).toLocaleDateString()}</td>
-                        <td className="d-flex justify-content-end">
+                        <td className="text-end">
                           <div className="dropdown" ref={dropdownRef}>
                             <button className="btn btn-link text-black p-0" onClick={() => toggleDropdown(index)}>
                               <FontAwesomeIcon icon={faEllipsisVertical} />
                             </button>
                             {dropdownOpen === index && (
-                              <div
-                                className="dropdown-menu show"
-                                style={{ maxWidth: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}
-                              >
-                                <button className="dropdown-item" onClick={() => showRenameInput(file.id)} disabled={isLoadingRename}>
+                              <div className="dropdown-menu show">
+                                <button className="dropdown-item" onClick={() => showRenameInput(file.id, file.name)} disabled={isLoadingRename}>
                                   Rename
                                 </button>
                                 <button className="dropdown-item" onClick={() => console.log('Export:', file.name)}>

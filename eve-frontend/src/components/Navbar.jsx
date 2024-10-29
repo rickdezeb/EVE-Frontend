@@ -1,10 +1,14 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faPenToSquare } from '@fortawesome/free-solid-svg-icons';
+import { faHome } from '@fortawesome/free-solid-svg-icons';
 import { NavLink, useLocation } from "react-router-dom";
 
 function Navbar() {
     const location = useLocation();
-    const isEdit = location.pathname === "/editpage";
+    const isProduct = location.pathname === "/productpage" || location.pathname === '/editpage';
+    const isEdit = location.pathname === '/editpage';
+
+    const state = location.state || {};
+    const file = state.file;
 
     return (
         <nav className="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-primary box-shadow mb-3">
@@ -22,16 +26,26 @@ function Navbar() {
                                     <FontAwesomeIcon icon={faHome} /> Home
                                 </NavLink>
                             </li>
+                            {isProduct && (
+                                <li className="breadcrumb-item">
+                                    <NavLink
+                                        to="/productpage"
+                                        state={file ? { file } : {}}
+                                        style={{ color: 'white' }}
+                                    >
+                                        Product
+                                    </NavLink>
+                                </li>
+                            )}
                             {isEdit && (
                                 <li className="breadcrumb-item">
-                                    <NavLink to="/editpage" style={{ color: 'white' }}>
+                                    <NavLink to="/editpage" state={state} style={{ color: 'white' }}>
                                         Edit
                                     </NavLink>
                                 </li>
                             )}
                         </ol>
                     </nav>
-
 
                     <ul className="navbar-nav ml-auto">
                         <li className="nav-item">

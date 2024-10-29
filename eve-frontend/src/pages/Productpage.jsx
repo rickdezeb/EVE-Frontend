@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload, faPlus, faTrash, faSortAlphaAsc, faSortNumericAsc } from '@fortawesome/free-solid-svg-icons';
-import { useLocation } from 'react-router-dom';
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useGetProducts, useAddProduct, useDeleteProduct } from '../hooks/ProductHooks';
 
 const Property = ({ product, file }) => {
@@ -16,8 +15,7 @@ const Property = ({ product, file }) => {
         {product.id}
       </button>
     </div>
-  )
-
+  );
 }
 
 export default function ProductPage() {
@@ -25,7 +23,7 @@ export default function ProductPage() {
   const data = location.state || {};
   const { file } = data;
 
-  const { products, isLoading: isLoadingProducts, refreshItems } = useGetProducts(file.id);
+  const { products, isLoading: isLoadingProducts, refreshItems } = useGetProducts(file?.id);
   const { remove, isLoading: isLoadingDelete } = useDeleteProduct(refreshItems);
   const { add, isLoading: isLoadingAdd } = useAddProduct(refreshItems);
 
@@ -77,7 +75,7 @@ export default function ProductPage() {
       <div className="card mb-3">
         <div className="card-body">
           <div className="d-flex justify-content-between align-items-center mb-4">
-            <h4>{file.name}</h4>
+            <h4>{file?.name}</h4>
             <div className="d-flex">
               <button className="btn btn-primary me-2">
                 <FontAwesomeIcon icon={faDownload} className="text-white" />
@@ -89,14 +87,6 @@ export default function ProductPage() {
               {isLoadingDelete ? <span className="spinner-border spinner-border-sm"></span> : <FontAwesomeIcon icon={faTrash} />}
               </button>
             </div>
-          </div>
-
-          <div className="mb-4">
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Search for a file..."
-            />
           </div>
 
           <table className="table table-auto table-hover align-middle">
@@ -126,4 +116,3 @@ export default function ProductPage() {
     </main>
   );
 }
-
