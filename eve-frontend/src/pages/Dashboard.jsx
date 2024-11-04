@@ -28,9 +28,9 @@ function Dashboard() {
 
   const [renameFileId, setRenameFileId] = useState(null);
   const [renameFileName, setRenameFileName] = useState("");
-
   const [dropdownOpen, setDropdownOpen] = useState(null);
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -47,8 +47,9 @@ function Dashboard() {
 
   const handleDelete = async () => {
     try {
-      await Promise.all(selectedFiles.map(fileId => remove(fileId)));      
+      await Promise.all(selectedFiles.map(fileId => remove(fileId)));
       setSelectedFiles([]);
+      setShowDeleteModal(false);
     } catch (error) {
       console.error(error);
     }
@@ -66,7 +67,6 @@ function Dashboard() {
   };
 
   const showRenameInput = (fileId, currentName) => {
-    console.log(fileId, currentName);
     setRenameFileId(fileId);
     setRenameFileName(currentName);
   };
@@ -97,15 +97,13 @@ function Dashboard() {
         <div className="card-body">
           <div className="mb-4 d-flex flex-column">
             <div className="d-flex flex-row-reverse mb-4">
-              <input
-                type="text"
-                className="form-control me-2"
-                placeholder="Search for file..."
-                hidden
-              />
               <div className="d-flex align-items-center">
                 <UploadExcelPopup uploadFile={upload} isLoading={isLoadingUpload} />
-                <button className="btn btn-danger" onClick={handleDelete} disabled={selectedFiles.length === 0 || isLoadingDelete}>
+                <button
+                  className="btn btn-danger"
+                  onClick={() => setShowDeleteModal(true)}
+                  disabled={selectedFiles.length === 0 || isLoadingDelete}
+                >
                   {isLoadingDelete ? <span className="spinner-border spinner-border-sm ms-2"></span> : <FontAwesomeIcon icon={faTrash} />}
                 </button>
               </div>
@@ -123,12 +121,8 @@ function Dashboard() {
                     <th scope="col">
                       <input type="checkbox" className="me-2" onChange={handleSelectAllFiles} checked={selectedFiles.length === files.length && files.length > 0} />
                     </th>
-                    <th scope="col" >
-                      File Name <FontAwesomeIcon icon={faSortAlphaAsc} hidden/>
-                    </th>
-                    <th scope="col">
-                      Last Updated <FontAwesomeIcon icon={faSortNumericAsc} hidden/>
-                    </th>
+                    <th scope="col">File Name <FontAwesomeIcon icon={faSortAlphaAsc} hidden /></th>
+                    <th scope="col">Last Updated <FontAwesomeIcon icon={faSortNumericAsc} hidden /></th>
                     <th scope="col"></th>
                   </tr>
                 </thead>
@@ -145,7 +139,7 @@ function Dashboard() {
                           />
                         </td>
                         {renameFileId === file.id ? (
-                          <td className='h-75'>
+                          <td className="h-75">
                             <input
                               type="text"
                               value={renameFileName}
@@ -165,21 +159,18 @@ function Dashboard() {
                         )}
                         <td>{new Date(file.lastUpdated).toLocaleDateString()}</td>
                         <td className="text-end">
-                            <button className="btn btn-link text-black p-0" onClick={() => toggleDropdown(index)}>
-                              <FontAwesomeIcon icon={faEllipsisVertical} />
-                            </button>
-                            {dropdownOpen === index && (
-                          <div className="dropdown" ref={dropdownRef}>
+                          <button className="btn btn-link text-black p-0" onClick={() => toggleDropdown(index)}>
+                            <FontAwesomeIcon icon={faEllipsisVertical} />
+                          </button>
+                          {dropdownOpen === index && (
+                            <div className="dropdown" ref={dropdownRef}>
                               <div className="dropdown-menu show">
                                 <button className="dropdown-item" onClick={() => showRenameInput(file.id, file.name)} disabled={isLoadingRename}>
                                   Rename
                                 </button>
-                                <button className="dropdown-item" onClick={() => console.log('Export:', file.name)} hidden>
-                                  Export
-                                </button>
                               </div>
-                          </div>
-                            )}
+                            </div>
+                          )}
                         </td>
                       </tr>
                     ))
@@ -193,6 +184,34 @@ function Dashboard() {
                 </tbody>
               </table>
             )}
+          </div>
+        </div>
+      </div>
+
+      {/* Delete Confirmation Modal */}
+      <div
+        className={`modal fade ${showDeleteModal ? 'show d-block' : ''}`}
+        tabIndex="-1"
+        role="dialog"
+        style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+      >
+        <div className="modal-dialog" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">Confirm Deletion</h5>
+              <button type="button" className="btn-close" onClick={() => setShowDeleteModal(false)}></button>
+            </div>
+            <div className="modal-body">
+              <p>Are you sure you want to delete the selected files?</p>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-secondary" onClick={() => setShowDeleteModal(false)}>
+                Cancel
+              </button>
+              <button type="button" className="btn btn-danger" onClick={handleDelete}>
+                Confirm
+              </button>
+            </div>
           </div>
         </div>
       </div>
