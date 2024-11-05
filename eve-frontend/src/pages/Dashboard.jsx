@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash, faSortAlphaAsc, faSortNumericAsc, faEllipsisVertical } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faSortAlphaAsc, faSortAlphaDesc, faSortNumericAsc, faEllipsisVertical } from '@fortawesome/free-solid-svg-icons';
 import UploadExcelPopup from '../components/UploadExcelPopup';
 import { useNavigate } from "react-router-dom";
 import { useGetFiles, useDeleteFile, useRenameFile, useUploadFile } from '../hooks/FileHooks.js';
@@ -21,7 +21,9 @@ export function File({ file, onFileClick }) {
 
 function Dashboard() {
   const navigate = useNavigate();
-  const { files, isLoading: isLoadingFiles, refreshItems } = useGetFiles();
+  const [sortByDate, setSortByDate] = useState(false);
+  const [isDescending, setIsDescending] = useState(false);
+  const { files, isLoading: isLoadingFiles, refreshItems } = useGetFiles(0, 15, sortByDate, isDescending);
   const { rename, isLoading: isLoadingRename } = useRenameFile(refreshItems);
   const { remove, isLoading: isLoadingDelete } = useDeleteFile(refreshItems);
   const { upload, isLoading: isLoadingUpload } = useUploadFile(refreshItems);
@@ -89,7 +91,12 @@ function Dashboard() {
 
   const loadProductPage = (file) => {
     navigate("/productpage", { state: { file } });
-  }
+  };
+
+  const handleSortByName = () => {
+    setIsDescending(prev => !prev);
+    setSortByDate(true);
+  };
 
   return (
     <main className="container">
@@ -123,11 +130,12 @@ function Dashboard() {
                     <th scope="col">
                       <input type="checkbox" className="me-2" onChange={handleSelectAllFiles} checked={selectedFiles.length === files.length && files.length > 0} />
                     </th>
-                    <th scope="col" >
-                      File Name <FontAwesomeIcon icon={faSortAlphaAsc} hidden/>
+                    <th scope="col" onClick={handleSortByName} style={{ cursor: 'pointer' }}>
+                      File Name 
+                      <FontAwesomeIcon icon={isDescending ? faSortAlphaDesc : faSortAlphaAsc} className="ms-1" />
                     </th>
                     <th scope="col">
-                      Last Updated <FontAwesomeIcon icon={faSortNumericAsc} hidden/>
+                      Last Updated <FontAwesomeIcon icon={faSortNumericAsc} hidden />
                     </th>
                     <th scope="col"></th>
                   </tr>
@@ -165,11 +173,11 @@ function Dashboard() {
                         )}
                         <td>{new Date(file.lastUpdated).toLocaleDateString()}</td>
                         <td className="text-end">
-                            <button className="btn btn-link text-black p-0" onClick={() => toggleDropdown(index)}>
-                              <FontAwesomeIcon icon={faEllipsisVertical} />
-                            </button>
-                            {dropdownOpen === index && (
-                          <div className="dropdown" ref={dropdownRef}>
+                          <button className="btn btn-link text-black p-0" onClick={() => toggleDropdown(index)}>
+                            <FontAwesomeIcon icon={faEllipsisVertical} />
+                          </button>
+                          {dropdownOpen === index && (
+                            <div className="dropdown" ref={dropdownRef}>
                               <div className="dropdown-menu show">
                                 <button className="dropdown-item" onClick={() => showRenameInput(file.id, file.name)} disabled={isLoadingRename}>
                                   Rename
@@ -178,8 +186,8 @@ function Dashboard() {
                                   Export
                                 </button>
                               </div>
-                          </div>
-                            )}
+                            </div>
+                          )}
                         </td>
                       </tr>
                     ))

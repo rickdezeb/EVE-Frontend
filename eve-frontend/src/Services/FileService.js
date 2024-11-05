@@ -2,10 +2,12 @@ import { api } from "../API/api";
 
 const controller = "Excel";
 
-export const getFiles = async () => {
-  const response = await api.get(controller);
+export const getFiles = async (page = 0, pageSize = 15, sortByDate = false, isDescending = false) => {
+  const endpoint = `?page=${page}&pagesize=${pageSize}&sortByDate=${sortByDate}&isDescending=${isDescending}`;
+  const response = await api.get(controller, endpoint);
   return response.json();
 };
+
 
 export const renameFile = (fileId, newFileName) => api.put(controller, null, `?id=${fileId}&fileName=${newFileName}`);
 
