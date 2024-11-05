@@ -103,7 +103,7 @@ export default function ProductPage() {
                 <tr key={product.id}>
                   <td><input type="checkbox" className="me-2" checked={selectedProducts.includes(product.id)} onChange={() => handleSelectProduct(product.id)} /> </td>
                   <td><Property product={product} file={file} /></td>
-                  <td>{product.lastUpdated}</td>
+                  <td>{new Date(product.lastUpdated).toLocaleDateString()}</td>
                 </tr>
               )) : (
                 <tr>
