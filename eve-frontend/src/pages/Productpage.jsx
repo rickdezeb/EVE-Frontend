@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload, faPlus, faTrash, faSortAlphaAsc, faSortNumericAsc } from '@fortawesome/free-solid-svg-icons';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useGetProducts, useAddProduct, useDeleteProduct } from '../hooks/ProductHooks';
+import { useDownloadFile } from '../hooks/FileHooks';
 
 const Property = ({ product, file }) => {
   const navigate = useNavigate();
@@ -23,7 +24,6 @@ const Property = ({ product, file }) => {
   );
 };
 
-
 export default function ProductPage() {
   const location = useLocation();
   const data = location.state || {};
@@ -32,6 +32,7 @@ export default function ProductPage() {
   const { products, isLoading: isLoadingProducts, refreshItems } = useGetProducts(file?.id);
   const { remove, isLoading: isLoadingDelete } = useDeleteProduct(refreshItems);
   const { add, isLoading: isLoadingAdd } = useAddProduct(refreshItems);
+  const { download, isLoading: isLoadingDownload } = useDownloadFile();
 
   const [selectedProducts, setSelectedProducts] = useState([]);
 
@@ -64,6 +65,10 @@ export default function ProductPage() {
     }
   }
 
+  const handleDownloadClick = () => {
+    download(file.id, file.name);
+  };
+
   const handleSelectProduct = (productId) => {
     setSelectedProducts((prevSelectedProducts) =>
       prevSelectedProducts.includes(productId)
@@ -71,6 +76,8 @@ export default function ProductPage() {
         : [...prevSelectedProducts, productId]
     );
   };
+
+
 
   if (isLoadingProducts) {
     return <div className="text-center">Loading products...<span className="spinner-border spinner-border-sm ms-2"></span></div>;
@@ -83,8 +90,8 @@ export default function ProductPage() {
           <div className="d-flex justify-content-between align-items-center mb-4">
             <h4>{file?.name}</h4>
             <div className="d-flex">
-              <button className="btn btn-primary me-2" hidden>
-                <FontAwesomeIcon icon={faDownload} className="text-white" />
+            <button className="btn btn-primary me-2" onClick={handleDownloadClick}>
+                {isLoadingDownload ? <span className="spinner-border spinner-border-sm"></span> : <FontAwesomeIcon icon={faDownload} className="text-white" />}
               </button>
               <button type="button" className="btn btn-primary me-2" onClick={handleAddProduct}>
               {isLoadingAdd ? <span className="spinner-border spinner-border-sm"></span> : <FontAwesomeIcon icon={faPlus} className="text-white" />}

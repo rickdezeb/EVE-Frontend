@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import * as fileService from "../services/FileService"
+import * as fileService from '../Services/FileService.js';
 
 export const useGetFiles = () => {
     const [files, setFiles] = useState([]);
@@ -47,6 +47,30 @@ export const useRenameFile = (refreshItems) => {
     }
     return { rename, isLoading }; 
 }
+
+export const useDownloadFile = () => {
+    const [isLoading, setIsLoading] = useState(false);
+  
+    const download = async (fileId, fileName) => {
+      setIsLoading(true);
+      try {
+        const blob = await fileService.downloadFile(fileId);
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `${fileName}.xlsx`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error("Error downloading file:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+  
+    return { download, isLoading };
+  };
+
 
 export const useDeleteFile = (refreshItems) => {
     const [isLoading, setIsLoading] = useState(false);
