@@ -152,7 +152,7 @@ function Editpage() {
                     className="form-control me-2 w-25"
                     value={inputPage}
                     onChange={handleInputPageChange}
-                    placeholder="Page"
+                    placeholder="Product"
                   />
                   <button className="btn btn-primary me-2" onClick={handleGoToPage}>Go</button>
                   <button className="btn btn-success" onClick={handleSave}>Save</button>

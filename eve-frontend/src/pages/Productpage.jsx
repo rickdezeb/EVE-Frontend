@@ -8,15 +8,21 @@ const Property = ({ product, file }) => {
   const navigate = useNavigate();
   const loadEditPage = () => {
     navigate("/editpage", { state: { product, file } });
-  }
+  };
+  
   return (
     <div>
-      <button onClick={loadEditPage}>
+      <span 
+        onClick={loadEditPage} 
+        className="text-primary" 
+        style={{ cursor: 'pointer' }}
+      >
         {product.id}
-      </button>
+      </span>
     </div>
   );
-}
+};
+
 
 export default function ProductPage() {
   const location = useLocation();
