@@ -4,8 +4,7 @@ import { faDownload, faPlus, faTrash, faSortAlphaAsc, faSortNumericAsc } from '@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useGetProducts, useAddProduct, useDeleteProduct } from '../hooks/ProductHooks';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'react-toastify';
 
 const Property = ({ product, file }) => {
   const navigate = useNavigate();
@@ -75,64 +74,67 @@ export default function ProductPage() {
     );
   };
 
-  if (isLoadingProducts) {
-    return <div className="text-center">Loading products...<span className="spinner-border spinner-border-sm ms-2"></span></div>;
-  }
-
   return (
     <main className="container mt-4">
-      <ToastContainer />
-      <div className="card mb-3">
-        <div className="card-body">
-          <div className="d-flex justify-content-between align-items-center mb-4">
-            <h4>{file?.name}</h4>
-            <div className="d-flex">
-              <button className="btn btn-primary me-2" hidden>
-                <FontAwesomeIcon icon={faDownload} className="text-white" />
-              </button>
-              <button type="button" className="btn btn-primary me-2" onClick={handleAddProduct}>
-              {isLoadingAdd ? <span className="spinner-border spinner-border-sm"></span> : <FontAwesomeIcon icon={faPlus} className="text-white" />}
-              </button>
-              <button
-                className="btn btn-danger"
-                onClick={() => setShowDeleteModal(true)}
-                disabled={selectedProducts.length === 0}
-              >
-              {isLoadingDelete ? <span className="spinner-border spinner-border-sm"></span> : <FontAwesomeIcon icon={faTrash} />}
-              </button>
+      {isLoadingProducts ?
+        <>
+          <div className="text-center">Loading products...<span className="spinner-border spinner-border-sm ms-2"></span></div>
+        </>
+        :
+        <>
+          <div className="card mb-3">
+            <div className="card-body">
+              <div className="d-flex justify-content-between align-items-center mb-4">
+                <h4>{file?.name}</h4>
+                <div className="d-flex">
+                  <button className="btn btn-primary me-2" hidden>
+                    <FontAwesomeIcon icon={faDownload} className="text-white" />
+                  </button>
+                  <button type="button" className="btn btn-primary me-2" onClick={handleAddProduct}>
+                    {isLoadingAdd ? <span className="spinner-border spinner-border-sm"></span> : <FontAwesomeIcon icon={faPlus} className="text-white" />}
+                  </button>
+                  <button
+                    className="btn btn-danger"
+                    onClick={() => setShowDeleteModal(true)}
+                    disabled={selectedProducts.length === 0}
+                  >
+                    {isLoadingDelete ? <span className="spinner-border spinner-border-sm"></span> : <FontAwesomeIcon icon={faTrash} />}
+                  </button>
+                </div>
+              </div>
+
+              <table className="table table-auto table-hover align-middle">
+                <thead>
+                  <tr>
+                    <th scope="col"><input type="checkbox" className="me-2" onChange={handleSelectAllProducts} checked={selectedProducts.length === products.length && products.length > 0} /></th>
+                    <th scope="col">Product Identifier <FontAwesomeIcon icon={faSortAlphaAsc} hidden /></th>
+                    <th scope="col">Last Updated <FontAwesomeIcon icon={faSortNumericAsc} hidden /></th>
+                    <th scope="col"></th>
+                  </tr>
+                </thead>
+                <tbody className="table-group-divider">
+                  {products.length > 0 ? products.map((product) => (
+                    <tr key={product.id}>
+                      <td><input type="checkbox" className="me-2" checked={selectedProducts.includes(product.id)} onChange={() => handleSelectProduct(product.id)} /> </td>
+                      <td><Property product={product} file={file} /></td>
+                      <td>{product.lastUpdated}</td>
+                    </tr>
+                  )) : (
+                    <tr>
+                      <td colSpan="4" className="text-center text-muted">No products found.</td>
+                    </tr>)}
+                </tbody>
+              </table>
             </div>
           </div>
-
-          <table className="table table-auto table-hover align-middle">
-            <thead>
-              <tr>
-                <th scope="col"><input type="checkbox" className="me-2" onChange={handleSelectAllProducts} checked={selectedProducts.length === products.length && products.length > 0} /></th>
-                <th scope="col">Product Identifier <FontAwesomeIcon icon={faSortAlphaAsc} hidden/></th>
-                <th scope="col">Last Updated <FontAwesomeIcon icon={faSortNumericAsc} hidden/></th>
-                <th scope="col"></th>
-              </tr>
-            </thead>
-            <tbody className="table-group-divider">
-              {products.length > 0 ? products.map((product) => (
-                <tr key={product.id}>
-                  <td><input type="checkbox" className="me-2" checked={selectedProducts.includes(product.id)} onChange={() => handleSelectProduct(product.id)} /> </td>
-                  <td><Property product={product} file={file} /></td>
-                  <td>{product.lastUpdated}</td>
-                </tr>
-              )) : (
-                <tr>
-                  <td colSpan="4" className="text-center text-muted">No products found.</td>
-                </tr>)}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <DeleteConfirmationModal
-        show={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
-        onConfirm={handleDeleteProducts}
-      />
+          <DeleteConfirmationModal
+            show={showDeleteModal}
+            onClose={() => setShowDeleteModal(false)}
+            onConfirm={handleDeleteProducts}
+          />
+        </>
+      }
     </main>
+
   );
 }

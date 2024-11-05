@@ -4,10 +4,13 @@ import "./App.css"
 import Navbar from './components/Navbar'
 import Productpage from './pages/Productpage'
 import Editpage from './pages/Edit-product'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
     return (
         <div>
+            <ToastContainer/>
             <Navbar />
             <Routes>
                 <Route path="/" element={<Dashboard />} />

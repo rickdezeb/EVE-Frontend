@@ -95,7 +95,6 @@ const Dashboard = () => {
 
   return (
     <main className="container">
-      <ToastContainer />
       <div className="card mb-3">
         <div className="card-body">
           <div className="d-flex flex-row-reverse mb-4">

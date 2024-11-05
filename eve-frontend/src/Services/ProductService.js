@@ -8,10 +8,10 @@ export const getProducts = async (fileId) => {
 } 
 
 export const deleteProduct = async (objectId) => {
-    api.delete(controller, objectId);
+    await api.delete(controller, objectId);
 }
 
 export const addProduct = async (fileId) => {
-    api.post(controller, null, `/${fileId}`);
+    await api.post(controller, null, `/${fileId}`);
 }
 
