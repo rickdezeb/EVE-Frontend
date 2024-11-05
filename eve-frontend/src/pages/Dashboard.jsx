@@ -95,7 +95,6 @@ function Dashboard() {
 
   const handleSortByName = () => {
     setIsDescending(prev => !prev);
-    setSortByDate(true);
   };
 
   return (

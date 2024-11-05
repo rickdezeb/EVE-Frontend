@@ -20,7 +20,7 @@ export const useGetFiles = (page = 0, pageSize = 15, sortByDate = false, isDesce
 
     useEffect(() => {
         retrieve();
-    }, [refresh, page, sortByDate, isDescending]);
+    }, [refresh, sortByDate, isDescending]);
 
     const refreshItems = () => {
         setRefresh((prevRefresh) => !prevRefresh);
