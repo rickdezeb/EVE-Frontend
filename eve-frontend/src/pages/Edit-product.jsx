@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useGetProperties, useUpdateProperty } from '../hooks/PropertyHooks';
 import { useGetProducts } from "../hooks/ProductHooks"
+import { toast } from 'react-toastify';
 
 function Editpage() {
   const location = useLocation();
@@ -39,9 +40,15 @@ function Editpage() {
     const updatePromises = localProperties.map(property =>
       update(selectedProductId, property.id, property.value)
     );
-    await Promise.all(updatePromises);
-  };
 
+    try {
+      await Promise.all(updatePromises);
+      toast.success("Properties updated successfully.");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to update properties.");
+    }
+  };
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -86,7 +93,6 @@ function Editpage() {
       handlePageChange(pageNumber);
     }
   };
-
 
   return (
     <div className="d-flex flex-column">
