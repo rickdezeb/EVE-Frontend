@@ -5,7 +5,7 @@ import UploadExcelPopup from '../components/UploadExcelPopup';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 import { useNavigate } from "react-router-dom";
 import { useGetFiles, useDeleteFile, useRenameFile, useUploadFile } from '../hooks/FileHooks.js';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast, } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const Dashboard = () => {
