@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash, faSortAlphaAsc, faSortAlphaDesc, faSortNumericAsc, faEllipsisVertical } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faSortAlphaAsc, faSortAlphaDesc, faSortNumericAsc, faSortNumericDesc, faEllipsisVertical } from '@fortawesome/free-solid-svg-icons';
 import UploadExcelPopup from '../components/UploadExcelPopup';
 import { useNavigate } from "react-router-dom";
 import { useGetFiles, useDeleteFile, useRenameFile, useUploadFile } from '../hooks/FileHooks.js';
@@ -95,6 +95,12 @@ function Dashboard() {
 
   const handleSortByName = () => {
     setIsDescending(prev => !prev);
+    SetSortByDate(false);
+  };
+
+  const HandleSortByDate = () => {
+    setSortByDate(prev => !prev);
+    setIsDescending(false);
   };
 
   return (
@@ -133,8 +139,8 @@ function Dashboard() {
                       File Name 
                       <FontAwesomeIcon icon={isDescending ? faSortAlphaDesc : faSortAlphaAsc} className="ms-1" />
                     </th>
-                    <th scope="col">
-                      Last Updated <FontAwesomeIcon icon={faSortNumericAsc} hidden />
+                    <th scope="col" onClick={HandleSortByDate} style={{ cursor: 'pointer' }}>
+                      Last Updated <FontAwesomeIcon icon={sortByDate ? faSortNumericAsc : faSortNumericDesc} />
                     </th>
                     <th scope="col"></th>
                   </tr>
