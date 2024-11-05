@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload, faPlus, faTrash, faSortAlphaAsc, faSortNumericAsc } from '@fortawesome/free-solid-svg-icons';
-import { useLocation } from 'react-router-dom';
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useGetProducts, useAddProduct, useDeleteProduct } from '../hooks/ProductHooks';
+import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Property = ({ product, file }) => {
   const navigate = useNavigate();
@@ -16,8 +18,7 @@ const Property = ({ product, file }) => {
         {product.id}
       </button>
     </div>
-  )
-
+  );
 }
 
 export default function ProductPage() {
@@ -25,31 +26,37 @@ export default function ProductPage() {
   const data = location.state || {};
   const { file } = data;
 
-  const { products, isLoading: isLoadingProducts, refreshItems } = useGetProducts(file.id);
+  const { products, isLoading: isLoadingProducts, refreshItems } = useGetProducts(file?.id);
   const { remove, isLoading: isLoadingDelete } = useDeleteProduct(refreshItems);
   const { add, isLoading: isLoadingAdd } = useAddProduct(refreshItems);
 
   const [selectedProducts, setSelectedProducts] = useState([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const handleDeleteProducts = async () => {
     try {
       await Promise.all(selectedProducts.map(productId => remove(productId)));
       setSelectedProducts([]);
+      setShowDeleteModal(false);
+      toast.error("Selected products deleted.", { theme: "colored" });
     }
     catch (error) {
       console.error(error);
+      toast.error("Failed to delete products.", { theme: "colored" });
     }
-  }
+  };
 
   const handleAddProduct = async (e) => {
     e.preventDefault();
     try {
       await add(file.id);
+      toast.success("Product added successfully.");
     }
     catch (error) {
       console.error(error);
+      toast.error("Failed to add product.");
     }
-  }
+  };
 
   const handleSelectAllProducts = (e) => {
     if (e.target.checked) {
@@ -58,7 +65,7 @@ export default function ProductPage() {
     else {
       setSelectedProducts([]);
     }
-  }
+  };
 
   const handleSelectProduct = (productId) => {
     setSelectedProducts((prevSelectedProducts) =>
@@ -74,37 +81,34 @@ export default function ProductPage() {
 
   return (
     <main className="container mt-4">
+      <ToastContainer />
       <div className="card mb-3">
         <div className="card-body">
           <div className="d-flex justify-content-between align-items-center mb-4">
-            <h4>{file.name}</h4>
+            <h4>{file?.name}</h4>
             <div className="d-flex">
-              <button className="btn btn-primary me-2">
+              <button className="btn btn-primary me-2" hidden>
                 <FontAwesomeIcon icon={faDownload} className="text-white" />
               </button>
               <button type="button" className="btn btn-primary me-2" onClick={handleAddProduct}>
               {isLoadingAdd ? <span className="spinner-border spinner-border-sm"></span> : <FontAwesomeIcon icon={faPlus} className="text-white" />}
               </button>
-              <button className="btn btn-danger" onClick={handleDeleteProducts} disabled={selectedProducts.length === 0}>
+              <button
+                className="btn btn-danger"
+                onClick={() => setShowDeleteModal(true)}
+                disabled={selectedProducts.length === 0}
+              >
               {isLoadingDelete ? <span className="spinner-border spinner-border-sm"></span> : <FontAwesomeIcon icon={faTrash} />}
               </button>
             </div>
-          </div>
-
-          <div className="mb-4">
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Search for a file..."
-            />
           </div>
 
           <table className="table table-auto table-hover align-middle">
             <thead>
               <tr>
                 <th scope="col"><input type="checkbox" className="me-2" onChange={handleSelectAllProducts} checked={selectedProducts.length === products.length && products.length > 0} /></th>
-                <th scope="col">Product Identifier <FontAwesomeIcon icon={faSortAlphaAsc} /></th>
-                <th scope="col">Last Updated <FontAwesomeIcon icon={faSortNumericAsc} /></th>
+                <th scope="col">Product Identifier <FontAwesomeIcon icon={faSortAlphaAsc} hidden/></th>
+                <th scope="col">Last Updated <FontAwesomeIcon icon={faSortNumericAsc} hidden/></th>
                 <th scope="col"></th>
               </tr>
             </thead>
@@ -123,7 +127,12 @@ export default function ProductPage() {
           </table>
         </div>
       </div>
+
+      <DeleteConfirmationModal
+        show={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteProducts}
+      />
     </main>
   );
 }
-
