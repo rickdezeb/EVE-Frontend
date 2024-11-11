@@ -3,15 +3,20 @@ import * as fileService from '../Services/FileService.js';
 
 export const useGetFiles = (page = 0, pageSize = 15, sortByDate = false, isDescending = false) => {
     const [files, setFiles] = useState([]);
+    const [totalFiles, setTotalFiles] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const [refresh, setRefresh] = useState(false);
 
     const retrieve = async () => {
         try {
             setIsLoading(true);
-            const data = await fileService.getFiles(page, pageSize, sortByDate, isDescending);
+            const [data, count] = await Promise.all([
+                fileService.getFiles(page, pageSize, sortByDate, isDescending),
+                fileService.getFileCount()
+            ]);
             console.log(`Retrieved files for page ${page}:`, data);
             setFiles(data);
+            setTotalFiles(count);
         } catch (error) {
             console.error(error);
         } finally {
@@ -28,7 +33,7 @@ export const useGetFiles = (page = 0, pageSize = 15, sortByDate = false, isDesce
         setRefresh((prevRefresh) => !prevRefresh);
     };
 
-    return { files, isLoading, refreshItems };
+    return { files, totalFiles, isLoading, refreshItems };
 };
 
 

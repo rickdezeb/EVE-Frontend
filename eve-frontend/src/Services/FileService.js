@@ -11,6 +11,11 @@ export const getFiles = async (page = 0, pageSize = 15, sortByDate = false, isDe
   return data;
 };
 
+export const getFileCount = async () => {
+  const endpoint = `/Count`;
+  const response = await api.get(controller, endpoint);
+  return response.json();
+};
 
 export const renameFile = (fileId, newFileName) => api.put(controller, null, `?id=${fileId}&fileName=${newFileName}`);
 
