@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash, faSortAlphaAsc, faSortAlphaDesc, faSortNumericAsc, faSortNumericDesc, faEllipsisVertical } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faSortAlphaAsc, faSortAlphaDesc, faSortNumericAsc, faSortNumericDesc, faEllipsisVertical, faDownload } from '@fortawesome/free-solid-svg-icons';
 import UploadExcelPopup from '../components/UploadExcelPopup';
 import { useNavigate } from "react-router-dom";
-import { useGetFiles, useDeleteFile, useRenameFile, useUploadFile } from '../hooks/FileHooks.js';
+import { useGetFiles, useDeleteFile, useRenameFile, useUploadFile, useDownloadFile } from '../hooks/FileHooks.js';
 
 export function File({ file, onFileClick }) {
   return (
@@ -28,6 +28,7 @@ export default function Dashboard() {
   const { rename, isLoading: isLoadingRename } = useRenameFile(refreshItems);
   const { remove, isLoading: isLoadingDelete } = useDeleteFile(refreshItems);
   const { upload, isLoading: isLoadingUpload } = useUploadFile(refreshItems);
+  const { download, isLoading: isLoadingDownload } = useDownloadFile();
 
   const [renameFileId, setRenameFileId] = useState(null);
   const [renameFileName, setRenameFileName] = useState("");
@@ -114,6 +115,25 @@ export default function Dashboard() {
     setIsDescending(false);
   };
 
+  const handleDownloadFile = async (fileId, fileName) => {
+    try {
+      await download(fileId, fileName);
+    } catch (error) {
+      console.error("Error downloading file:", error);
+    }
+  };
+
+  const handleBulkDownload = async () => {
+    try {
+      await Promise.all(selectedFiles.map(fileId => {
+        const file = files.find(f => f.id === fileId);
+        return download(fileId, file.name);
+      }));
+    } catch (error) {
+      console.error("Error downloading files:", error);
+    }
+  };
+
   return (
     <main className="container">
       <div className="card mb-3">
@@ -128,6 +148,9 @@ export default function Dashboard() {
               />
               <div className="d-flex align-items-center">
                 <UploadExcelPopup uploadFile={upload} isLoading={isLoadingUpload} />
+                <button className="btn btn-primary me-2" onClick={handleBulkDownload} disabled={selectedFiles.length === 0 || isLoadingDownload}>
+                  {isLoadingDownload ? <span className="spinner-border spinner-border-sm ms-2"></span> : <FontAwesomeIcon icon={faDownload} />}
+                </button>
                 <button className="btn btn-danger" onClick={handleDelete} disabled={selectedFiles.length === 0 || isLoadingDelete}>
                   {isLoadingDelete ? <span className="spinner-border spinner-border-sm ms-2"></span> : <FontAwesomeIcon icon={faTrash} />}
                 </button>
@@ -197,6 +220,9 @@ export default function Dashboard() {
                               <div className="dropdown-menu show">
                                 <button className="dropdown-item" onClick={() => showRenameInput(file.id, file.name)} disabled={isLoadingRename}>
                                   Rename
+                                </button>
+                                <button className="dropdown-item" onClick={() => handleDownloadFile(file.id, file.name)}>
+                                  Download
                                 </button>
                                 <button className="dropdown-item" onClick={() => console.log('Export:', file.name)} hidden>
                                   Export

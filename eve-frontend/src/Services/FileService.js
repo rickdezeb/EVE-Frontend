@@ -19,7 +19,8 @@ export const deleteFile = (fileId) => api.delete(controller, fileId);
 export const uploadFile = (formData) => api.post(controller, formData);
 
 export const downloadFile = async (fileId) => {
-  const response = await api.get(controller, `/${fileId}/download`); //API aanroep moet nog goedgezet worden
+  const endpoint = `/${fileId}/download`;
+  const response = await api.get(controller, endpoint);
   if (!response.ok) {
     throw new Error("Failed to download file");
   }

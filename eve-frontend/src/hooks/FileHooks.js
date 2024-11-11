@@ -60,7 +60,7 @@ export const useDownloadFile = () => {
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = `${fileName}.xlsx`;
+        link.download = `${fileName}`;
         link.click();
         window.URL.revokeObjectURL(url);
       } catch (error) {
@@ -71,8 +71,7 @@ export const useDownloadFile = () => {
     };
   
     return { download, isLoading };
-  };
-
+};
 
 export const useDeleteFile = (refreshItems) => {
     const [isLoading, setIsLoading] = useState(false);
