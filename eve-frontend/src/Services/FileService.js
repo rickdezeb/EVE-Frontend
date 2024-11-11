@@ -4,8 +4,11 @@ const controller = "Excel";
 
 export const getFiles = async (page = 0, pageSize = 15, sortByDate = false, isDescending = false) => {
   const endpoint = `?page=${page}&pagesize=${pageSize}&sortByDate=${sortByDate}&isDescending=${isDescending}`;
+  console.log(`Calling API with endpoint: ${endpoint}`);
   const response = await api.get(controller, endpoint);
-  return response.json();
+  const data = await response.json();
+  console.log(`API response for page ${page}:`, data);
+  return data;
 };
 
 

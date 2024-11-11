@@ -22,7 +22,7 @@ export const useGetProducts = (fileId, page = 0, pageSize = 15, isDescending = f
 
     useEffect(() => {
         retrieve();
-    }, [refresh, isDescending]);
+    }, [refresh, page, isDescending]);
 
     const refreshItems = () => {
         setRefresh((prevRefresh) => !prevRefresh);

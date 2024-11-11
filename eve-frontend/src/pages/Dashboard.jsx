@@ -19,11 +19,12 @@ export function File({ file, onFileClick }) {
   )
 }
 
-function Dashboard() {
+export default function Dashboard() {
   const navigate = useNavigate();
   const [sortByDate, setSortByDate] = useState(false);
   const [isDescending, setIsDescending] = useState(false);
-  const { files, isLoading: isLoadingFiles, refreshItems } = useGetFiles(0, 15, sortByDate, isDescending);
+  const [page, setPage] = useState(0);
+  const { files, isLoading: isLoadingFiles, refreshItems } = useGetFiles(page, 15, sortByDate, isDescending);
   const { rename, isLoading: isLoadingRename } = useRenameFile(refreshItems);
   const { remove, isLoading: isLoadingDelete } = useDeleteFile(refreshItems);
   const { upload, isLoading: isLoadingUpload } = useUploadFile(refreshItems);
@@ -81,6 +82,16 @@ function Dashboard() {
     }
   };
 
+  const handleNextPage = () => {
+    console.log(`Next page: ${page + 1}`);
+    setPage((prevPage) => prevPage + 1);
+  };
+
+  const handlePreviousPage = () => {
+    console.log(`Previous page: ${Math.max(page - 1, 0)}`);
+    setPage((prevPage) => Math.max(prevPage - 1, 0));
+  };
+
   const handleSelectFile = (fileId) => {
     setSelectedFiles((prevSelectedFiles) =>
       prevSelectedFiles.includes(fileId)
@@ -95,7 +106,7 @@ function Dashboard() {
 
   const handleSortByName = () => {
     setIsDescending(prev => !prev);
-    SetSortByDate(false);
+    setSortByDate(false);
   };
 
   const HandleSortByDate = () => {
@@ -207,10 +218,12 @@ function Dashboard() {
               </table>
             )}
           </div>
+          <div className="d-flex justify-content-center mt-3">
+              <button className="btn btn-primary me-2" onClick={handlePreviousPage} disabled={page === 0}>Previous Page</button>
+              <button className="btn btn-primary" onClick={handleNextPage} disabled={files.length < 15}>Next Page</button>
+            </div>
         </div>
       </div>
     </main>
   );
 }
-
-export default Dashboard;

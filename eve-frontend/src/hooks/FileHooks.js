@@ -10,6 +10,7 @@ export const useGetFiles = (page = 0, pageSize = 15, sortByDate = false, isDesce
         try {
             setIsLoading(true);
             const data = await fileService.getFiles(page, pageSize, sortByDate, isDescending);
+            console.log(`Retrieved files for page ${page}:`, data);
             setFiles(data);
         } catch (error) {
             console.error(error);
@@ -19,8 +20,9 @@ export const useGetFiles = (page = 0, pageSize = 15, sortByDate = false, isDesce
     };
 
     useEffect(() => {
+        console.log(`Fetching files for page ${page}`);
         retrieve();
-    }, [refresh, sortByDate, isDescending]);
+    }, [refresh, page, sortByDate, isDescending]);
 
     const refreshItems = () => {
         setRefresh((prevRefresh) => !prevRefresh);
@@ -28,7 +30,6 @@ export const useGetFiles = (page = 0, pageSize = 15, sortByDate = false, isDesce
 
     return { files, isLoading, refreshItems };
 };
-
 
 
 export const useRenameFile = (refreshItems) => {

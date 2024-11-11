@@ -30,7 +30,8 @@ export default function ProductPage() {
   const { file } = data;
 
   const [isDescending, setIsDescending] = useState(false);
-  const { products, isLoading: isLoadingProducts, refreshItems } = useGetProducts(file?.id, 0, 15, isDescending);
+  const [page, setPage] = useState(0);
+  const { products, isLoading: isLoadingProducts, refreshItems } = useGetProducts(file?.id, page, 15, isDescending);
   const { remove, isLoading: isLoadingDelete } = useDeleteProduct(refreshItems);
   const { add, isLoading: isLoadingAdd } = useAddProduct(refreshItems);
   const { download, isLoading: isLoadingDownload } = useDownloadFile();
@@ -82,6 +83,14 @@ export default function ProductPage() {
     setIsDescending((prevIsDescending) => !prevIsDescending);
   };
 
+  const handleNextPage = () => {
+    setPage((prevPage) => prevPage + 1);
+  };
+
+  const handlePreviousPage = () => {
+    setPage((prevPage) => Math.max(prevPage - 1, 0));
+  };
+
   if (isLoadingProducts) {
     return <div className="text-center">Loading products...<span className="spinner-border spinner-border-sm ms-2"></span></div>;
   }
@@ -129,6 +138,11 @@ export default function ProductPage() {
                 </tr>)}
             </tbody>
           </table>
+
+          <div className="d-flex justify-content-center mt-3">
+            <button className="btn btn-primary me-2" onClick={handlePreviousPage} disabled={page === 0}>Previous Page</button>
+            <button className="btn btn-primary" onClick={handleNextPage} disabled={products.length < 15}>Next Page</button>
+          </div>
         </div>
       </div>
     </main>
