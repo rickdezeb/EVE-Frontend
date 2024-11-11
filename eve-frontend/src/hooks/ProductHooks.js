@@ -1,34 +1,35 @@
 import { useEffect, useState } from "react"
 import * as productService from "../services/ProductService"
 
-export const useGetProducts = (fileId) => {
+export const useGetProducts = (fileId, page = 0, pageSize = 15, isDescending = false) => {
     const [products, setProducts] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [refresh, setRefresh] = useState(false);
 
-    const retreive = async () => {
+    const retrieve = async () => {
         try {
             setIsLoading(true);
-            const data = await productService.getProducts(fileId);
+            const data = await productService.getProducts(fileId, page, pageSize, isDescending);
             setProducts(data);
         }
         catch (error) {
             console.error(error);
         }
         finally {
-            setIsLoading(false)
+            setIsLoading(false);
         }
-    }
+    };
 
     useEffect(() => {
-        retreive();
-    },[refresh]);
+        retrieve();
+    }, [refresh, isDescending]);
 
     const refreshItems = () => {
         setRefresh((prevRefresh) => !prevRefresh);
-    }
+    };
+
     return { products, isLoading, refreshItems };
-}
+};
 
 export const useDeleteProduct = (refreshItems) => {
     const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
