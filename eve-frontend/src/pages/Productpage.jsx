@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDownload, faPlus, faTrash, faSortAlphaAsc, faSortNumericAsc } from '@fortawesome/free-solid-svg-icons';
+import { faDownload, faPlus, faTrash, faSortAlphaAsc, faSortAlphaDesc, faSortNumericAsc, faSortNumericDesc } from '@fortawesome/free-solid-svg-icons';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useGetProducts, useAddProduct, useDeleteProduct } from '../hooks/ProductHooks';
 import { useDownloadFile } from '../hooks/FileHooks';
@@ -29,7 +29,8 @@ export default function ProductPage() {
   const data = location.state || {};
   const { file } = data;
 
-  const { products, isLoading: isLoadingProducts, refreshItems } = useGetProducts(file?.id);
+  const [isDescending, setIsDescending] = useState(false);
+  const { products, isLoading: isLoadingProducts, refreshItems } = useGetProducts(file?.id, 0, 15, isDescending);
   const { remove, isLoading: isLoadingDelete } = useDeleteProduct(refreshItems);
   const { add, isLoading: isLoadingAdd } = useAddProduct(refreshItems);
   const { download, isLoading: isLoadingDownload } = useDownloadFile();
@@ -44,7 +45,7 @@ export default function ProductPage() {
     catch (error) {
       console.error(error);
     }
-  }
+  };
 
   const handleAddProduct = async (e) => {
     e.preventDefault();
@@ -54,7 +55,7 @@ export default function ProductPage() {
     catch (error) {
       console.error(error);
     }
-  }
+  };
 
   const handleSelectAllProducts = (e) => {
     if (e.target.checked) {
@@ -63,7 +64,7 @@ export default function ProductPage() {
     else {
       setSelectedProducts([]);
     }
-  }
+  };
 
   const handleDownloadClick = () => {
     download(file.id, file.name);
@@ -77,7 +78,9 @@ export default function ProductPage() {
     );
   };
 
-
+  const handleSortClick = () => {
+    setIsDescending((prevIsDescending) => !prevIsDescending);
+  };
 
   if (isLoadingProducts) {
     return <div className="text-center">Loading products...<span className="spinner-border spinner-border-sm ms-2"></span></div>;
@@ -90,14 +93,14 @@ export default function ProductPage() {
           <div className="d-flex justify-content-between align-items-center mb-4">
             <h4>{file?.name}</h4>
             <div className="d-flex">
-            <button className="btn btn-primary me-2" onClick={handleDownloadClick}>
+              <button className="btn btn-primary me-2" onClick={handleDownloadClick}>
                 {isLoadingDownload ? <span className="spinner-border spinner-border-sm"></span> : <FontAwesomeIcon icon={faDownload} className="text-white" />}
               </button>
               <button type="button" className="btn btn-primary me-2" onClick={handleAddProduct}>
-              {isLoadingAdd ? <span className="spinner-border spinner-border-sm"></span> : <FontAwesomeIcon icon={faPlus} className="text-white" />}
+                {isLoadingAdd ? <span className="spinner-border spinner-border-sm"></span> : <FontAwesomeIcon icon={faPlus} className="text-white" />}
               </button>
               <button className="btn btn-danger" onClick={handleDeleteProducts} disabled={selectedProducts.length === 0}>
-              {isLoadingDelete ? <span className="spinner-border spinner-border-sm"></span> : <FontAwesomeIcon icon={faTrash} />}
+                {isLoadingDelete ? <span className="spinner-border spinner-border-sm"></span> : <FontAwesomeIcon icon={faTrash} />}
               </button>
             </div>
           </div>
@@ -107,7 +110,9 @@ export default function ProductPage() {
               <tr>
                 <th scope="col"><input type="checkbox" className="me-2" onChange={handleSelectAllProducts} checked={selectedProducts.length === products.length && products.length > 0} /></th>
                 <th scope="col">Product Identifier <FontAwesomeIcon icon={faSortAlphaAsc} hidden/></th>
-                <th scope="col">Last Updated <FontAwesomeIcon icon={faSortNumericAsc} hidden/></th>
+                <th scope="col" onClick={handleSortClick} style={{ cursor: 'pointer' }}>
+                  Last Updated <FontAwesomeIcon icon={isDescending ? faSortNumericDesc : faSortNumericAsc} />
+                </th>
                 <th scope="col"></th>
               </tr>
             </thead>
