@@ -1,9 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash, faSortAlphaAsc, faSortAlphaDesc, faSortNumericAsc, faSortNumericDesc, faEllipsisVertical, faDownload } from '@fortawesome/free-solid-svg-icons';
 import UploadExcelPopup from '../components/UploadExcelPopup';
+import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 import { useNavigate } from "react-router-dom";
 import { useGetFiles, useDeleteFile, useRenameFile, useUploadFile, useDownloadFile } from '../hooks/FileHooks.js';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export function File({ file, onFileClick }) {
   return (
@@ -34,9 +37,9 @@ export default function Dashboard() {
 
   const [renameFileId, setRenameFileId] = useState(null);
   const [renameFileName, setRenameFileName] = useState("");
-
   const [dropdownOpen, setDropdownOpen] = useState(null);
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -53,18 +56,37 @@ export default function Dashboard() {
 
   const handleDelete = async () => {
     try {
-      await Promise.all(selectedFiles.map(fileId => remove(fileId)));      
+      await Promise.all(selectedFiles.map(fileId => remove(fileId)));
       setSelectedFiles([]);
+      setShowDeleteModal(false);
+      toast.error("Selected files deleted.", { theme: "colored" });
     } catch (error) {
       console.error(error);
+      toast.error("Failed to delete files.", { theme: "colored" });
     }
   };
 
   const handleRename = async (fileId) => {
     if (renameFileName.trim() === "") return;
-    await rename(fileId, renameFileName);
-    setRenameFileId(null);
-    setRenameFileName("");
+    try {
+      await rename(fileId, renameFileName);
+      setRenameFileId(null);
+      setRenameFileName("");
+      toast.success("File successfully renamed.", { theme: "colored" });
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to rename file.", { theme: "colored" });
+    }
+  };
+
+  const handleUpload = async (file) => {
+    try {
+      await upload(file);
+      toast.success("File successfully uploaded.", { theme: "colored" });
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to upload file.", { theme: "colored" });
+    }
   };
 
   const toggleDropdown = (index) => {
@@ -202,11 +224,11 @@ export default function Dashboard() {
                 hidden
               />
               <div className="d-flex align-items-center">
-                <UploadExcelPopup uploadFile={upload} isLoading={isLoadingUpload} />
+                <UploadExcelPopup uploadFile={handleUpload} isLoading={isLoadingUpload} />
                 <button className="btn btn-primary me-2" onClick={handleBulkDownload} disabled={selectedFiles.length === 0 || isLoadingDownload}>
                   {isLoadingDownload ? <span className="spinner-border spinner-border-sm ms-2"></span> : <FontAwesomeIcon icon={faDownload} />}
                 </button>
-                <button className="btn btn-danger" onClick={handleDelete} disabled={selectedFiles.length === 0 || isLoadingDelete}>
+                <button className="btn btn-danger" onClick={() => setShowDeleteModal(true)} disabled={selectedFiles.length === 0 || isLoadingDelete}>
                   {isLoadingDelete ? <span className="spinner-border spinner-border-sm ms-2"></span> : <FontAwesomeIcon icon={faTrash} />}
                 </button>
               </div>
@@ -345,6 +367,12 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      <DeleteConfirmationModal
+        show={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+      />
     </main>
   );
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useGetProperties, useUpdateProperty } from '../hooks/PropertyHooks';
+import { toast } from 'react-toastify';
 import { useGetProducts } from "../hooks/ProductHooks";
 
 function Editpage() {
@@ -39,10 +40,21 @@ function Editpage() {
     const updatePromises = localProperties.map(property =>
       update(selectedProductId, property.id, property.value)
     );
-    await Promise.all(updatePromises);
+
+    try {
+      await Promise.all(updatePromises);
+      toast.success("Properties updated successfully.");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to update properties.");
+    }
   };
 
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = products.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(totalProducts / itemsPerPage);
+
 
   const getPaginationNumbers = () => {
     const paginationNumbers = [];
