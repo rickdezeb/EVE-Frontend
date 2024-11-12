@@ -170,7 +170,6 @@ export default function ProductPage() {
     <main className="container mt-4">
       <div className="card mb-3">
         <div className="card-body">
-          <LiveSearchComponent onSearch={handleSearch} />
           <div className="d-flex justify-content-between align-items-center mb-4">
             <h4>{file?.name}</h4>
             <div className="d-flex">
