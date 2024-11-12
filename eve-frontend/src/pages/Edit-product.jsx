@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useGetProperties, useUpdateProperty } from '../hooks/PropertyHooks';
-import { useGetProducts } from "../hooks/ProductHooks"
+import { useGetProducts } from "../hooks/ProductHooks";
 
 function Editpage() {
   const location = useLocation();
@@ -11,11 +11,11 @@ function Editpage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [inputPage, setInputPage] = useState('');
   const itemsPerPage = 1;
-  
-  const [selectedProductId, setSelectedProductId] = useState(product.id); 
+
+  const [selectedProductId, setSelectedProductId] = useState(product.id);
   const { properties, isLoading: isLoadingProperties, refreshItems } = useGetProperties(selectedProductId);
   const { update, isLoading: isLoadingUpdate } = useUpdateProperty(refreshItems);
-  const { products, isLoading: isLoadingProducts } = useGetProducts(file.id);
+  const { products, totalProducts, isLoading: isLoadingProducts } = useGetProducts(file.id, currentPage - 1, itemsPerPage);
 
   const [localProperties, setLocalProperties] = useState(properties);
 
@@ -42,11 +42,7 @@ function Editpage() {
     await Promise.all(updatePromises);
   };
 
-
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = products.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(products.length / itemsPerPage);
+  const totalPages = Math.ceil(totalProducts / itemsPerPage);
 
   const getPaginationNumbers = () => {
     const paginationNumbers = [];
@@ -72,7 +68,7 @@ function Editpage() {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
       setInputPage('');
-      setSelectedProductId(products[(page - 1) * itemsPerPage].id);
+      setSelectedProductId(products[0]?.id); // Update selectedProductId to the first product on the new page
     }
   };
 
@@ -86,7 +82,6 @@ function Editpage() {
       handlePageChange(pageNumber);
     }
   };
-
 
   return (
     <div className="d-flex flex-column">
@@ -122,7 +117,7 @@ function Editpage() {
             {isLoadingProducts ? (<div className="text-center">Loading pagination...<span className="spinner-border spinner-border-sm ms-2"></span></div>) : (
               <>
                 <div className="me-3">
-                  <div>Total {products.length} products </div>
+                  <div>Total {totalProducts} products </div>
                 </div>
                 <nav>
                   <ul className="pagination mb-0">

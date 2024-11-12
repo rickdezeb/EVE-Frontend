@@ -3,32 +3,35 @@ import * as productService from "../services/ProductService"
 
 export const useGetProducts = (fileId, page = 0, pageSize = 15, isDescending = false) => {
     const [products, setProducts] = useState([]);
+    const [totalProducts, setTotalProducts] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const [refresh, setRefresh] = useState(false);
 
     const retrieve = async () => {
         try {
             setIsLoading(true);
-            const data = await productService.getProducts(fileId, page, pageSize, isDescending);
+            const [data, count] = await Promise.all([
+                productService.getProducts(fileId, page, pageSize, isDescending),
+                productService.getProductCount(fileId)
+            ]);
             setProducts(data);
-        }
-        catch (error) {
+            setTotalProducts(count);
+        } catch (error) {
             console.error(error);
-        }
-        finally {
+        } finally {
             setIsLoading(false);
         }
     };
 
     useEffect(() => {
         retrieve();
-    }, [refresh, isDescending]);
+    }, [refresh, page, isDescending]);
 
     const refreshItems = () => {
         setRefresh((prevRefresh) => !prevRefresh);
     };
 
-    return { products, isLoading, refreshItems };
+    return { products, totalProducts, isLoading, refreshItems };
 };
 
 export const useDeleteProduct = (refreshItems) => {

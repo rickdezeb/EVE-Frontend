@@ -9,6 +9,12 @@ export const getProducts = async (fileId, page = 0, pageSize = 15, isDescending 
     return response.json();
 };
 
+export const getProductCount = async (fileId) => {
+    const endpoint = `/${fileId}/Count`;
+    const response = await api.get(controller, endpoint);
+    return response.json();
+};
+
 export const deleteProduct = async (objectId) => {
     api.delete(controller, objectId);
 }

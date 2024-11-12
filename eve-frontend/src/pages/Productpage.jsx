@@ -30,7 +30,10 @@ export default function ProductPage() {
   const { file } = data;
 
   const [isDescending, setIsDescending] = useState(false);
-  const { products, isLoading: isLoadingProducts, refreshItems } = useGetProducts(file?.id, 0, 15, isDescending);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [inputPage, setInputPage] = useState('');
+  const itemsPerPage = 15;
+  const { products, totalProducts, isLoading: isLoadingProducts, refreshItems } = useGetProducts(file?.id, currentPage - 1, itemsPerPage, isDescending);
   const { remove, isLoading: isLoadingDelete } = useDeleteProduct(refreshItems);
   const { add, isLoading: isLoadingAdd } = useAddProduct(refreshItems);
   const { download, isLoading: isLoadingDownload } = useDownloadFile();
@@ -82,6 +85,69 @@ export default function ProductPage() {
     setIsDescending((prevIsDescending) => !prevIsDescending);
   };
 
+  const handleNextPage = () => {
+    setCurrentPage((prevPage) => prevPage + 1);
+  };
+
+  const handlePreviousPage = () => {
+    setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
+  };
+
+  const totalPages = Math.ceil(totalProducts / itemsPerPage);
+
+  const getPaginationNumbers = () => {
+    const paginationNumbers = [];
+    const maxVisible = 5;
+    const halfVisible = Math.floor(maxVisible / 2);
+
+    let startPage = Math.max(1, currentPage - halfVisible);
+    let endPage = Math.min(totalPages, currentPage + halfVisible);
+
+    if (startPage === 1) {
+      endPage = Math.min(totalPages, startPage + maxVisible - 1);
+    } else if (endPage === totalPages) {
+      startPage = Math.max(1, endPage - maxVisible + 1);
+    }
+
+    if (startPage > 1) {
+      paginationNumbers.push(1);
+      if (startPage > 2) {
+        paginationNumbers.push('...');
+      }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      paginationNumbers.push(i);
+    }
+
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) {
+        paginationNumbers.push('...');
+      }
+      paginationNumbers.push(totalPages);
+    }
+
+    return paginationNumbers;
+  };
+
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+      setInputPage('');
+    }
+  };
+
+  const handleInputPageChange = (event) => {
+    setInputPage(event.target.value);
+  };
+
+  const handleGoToPage = () => {
+    const pageNumber = parseInt(inputPage, 10);
+    if (!isNaN(pageNumber)) {
+      handlePageChange(pageNumber);
+    }
+  };
+
   if (isLoadingProducts) {
     return <div className="text-center">Loading products...<span className="spinner-border spinner-border-sm ms-2"></span></div>;
   }
@@ -129,6 +195,51 @@ export default function ProductPage() {
                 </tr>)}
             </tbody>
           </table>
+
+          <div className="d-flex justify-content-center align-items-center mt-3">
+            {isLoadingProducts ? (
+              <div className="text-center">Loading pagination...<span className="spinner-border spinner-border-sm ms-2"></span></div>
+            ) : (
+              <>
+                <nav>
+                  <ul className="pagination mb-0">
+                    <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                      <button className="page-link" onClick={() => handlePageChange(currentPage - 1)}>
+                        Previous
+                      </button>
+                    </li>
+                    {getPaginationNumbers().map((pageNumber, index) => (
+                      <li className={`page-item ${currentPage === pageNumber ? 'active' : ''}`} key={index}>
+                        {pageNumber === '...' ? (
+                          <span className="page-link">...</span>
+                        ) : (
+                          <button className="page-link" onClick={() => handlePageChange(pageNumber)}>
+                            {pageNumber}
+                          </button>
+                        )}
+                      </li>
+                    ))}
+                    <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                      <button className="page-link" onClick={() => handlePageChange(currentPage + 1)}>
+                        Next
+                      </button>
+                    </li>
+                  </ul>
+                </nav>
+                <div className="d-flex align-items-center ms-3">
+                  <span className="me-2">Go to:</span>
+                  <input
+                    type="number"
+                    className="form-control me-2 w-25"
+                    value={inputPage}
+                    onChange={handleInputPageChange}
+                    placeholder="Page"
+                  />
+                  <button className="btn btn-primary me-2" onClick={handleGoToPage}>Go</button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </main>

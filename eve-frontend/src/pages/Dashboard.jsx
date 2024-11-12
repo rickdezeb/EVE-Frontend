@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash, faSortAlphaAsc, faSortAlphaDesc, faSortNumericAsc, faSortNumericDesc, faEllipsisVertical } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faSortAlphaAsc, faSortAlphaDesc, faSortNumericAsc, faSortNumericDesc, faEllipsisVertical, faDownload } from '@fortawesome/free-solid-svg-icons';
 import UploadExcelPopup from '../components/UploadExcelPopup';
 import { useNavigate } from "react-router-dom";
-import { useGetFiles, useDeleteFile, useRenameFile, useUploadFile } from '../hooks/FileHooks.js';
+import { useGetFiles, useDeleteFile, useRenameFile, useUploadFile, useDownloadFile } from '../hooks/FileHooks.js';
 
 export function File({ file, onFileClick }) {
   return (
@@ -19,14 +19,18 @@ export function File({ file, onFileClick }) {
   )
 }
 
-function Dashboard() {
+export default function Dashboard() {
   const navigate = useNavigate();
   const [sortByDate, setSortByDate] = useState(false);
   const [isDescending, setIsDescending] = useState(false);
-  const { files, isLoading: isLoadingFiles, refreshItems } = useGetFiles(0, 15, sortByDate, isDescending);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [inputPage, setInputPage] = useState('');
+  const itemsPerPage = 15;
+  const { files, totalFiles, isLoading: isLoadingFiles, refreshItems } = useGetFiles(currentPage - 1, itemsPerPage, sortByDate, isDescending);
   const { rename, isLoading: isLoadingRename } = useRenameFile(refreshItems);
   const { remove, isLoading: isLoadingDelete } = useDeleteFile(refreshItems);
   const { upload, isLoading: isLoadingUpload } = useUploadFile(refreshItems);
+  const { download, isLoading: isLoadingDownload } = useDownloadFile();
 
   const [renameFileId, setRenameFileId] = useState(null);
   const [renameFileName, setRenameFileName] = useState("");
@@ -81,6 +85,14 @@ function Dashboard() {
     }
   };
 
+  const handleNextPage = () => {
+    setCurrentPage((prevPage) => prevPage + 1);
+  };
+
+  const handlePreviousPage = () => {
+    setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
+  };
+
   const handleSelectFile = (fileId) => {
     setSelectedFiles((prevSelectedFiles) =>
       prevSelectedFiles.includes(fileId)
@@ -95,12 +107,86 @@ function Dashboard() {
 
   const handleSortByName = () => {
     setIsDescending(prev => !prev);
-    SetSortByDate(false);
+    setSortByDate(false);
   };
 
   const HandleSortByDate = () => {
     setSortByDate(prev => !prev);
     setIsDescending(false);
+  };
+
+  const handleDownloadFile = async (fileId, fileName) => {
+    try {
+      await download(fileId, fileName);
+    } catch (error) {
+      console.error("Error downloading file:", error);
+    }
+  };
+
+  const handleBulkDownload = async () => {
+    try {
+      await Promise.all(selectedFiles.map(fileId => {
+        const file = files.find(f => f.id === fileId);
+        return download(fileId, file.name);
+      }));
+    } catch (error) {
+      console.error("Error downloading files:", error);
+    }
+  };
+
+  const totalPages = Math.ceil(totalFiles / itemsPerPage);
+
+  const getPaginationNumbers = () => {
+    const paginationNumbers = [];
+    const maxVisible = 5;
+    const halfVisible = Math.floor(maxVisible / 2);
+
+    let startPage = Math.max(1, currentPage - halfVisible);
+    let endPage = Math.min(totalPages, currentPage + halfVisible);
+
+    if (startPage === 1) {
+      endPage = Math.min(totalPages, startPage + maxVisible - 1);
+    } else if (endPage === totalPages) {
+      startPage = Math.max(1, endPage - maxVisible + 1);
+    }
+
+    if (startPage > 1) {
+      paginationNumbers.push(1);
+      if (startPage > 2) {
+        paginationNumbers.push('...');
+      }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      paginationNumbers.push(i);
+    }
+
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) {
+        paginationNumbers.push('...');
+      }
+      paginationNumbers.push(totalPages);
+    }
+
+    return paginationNumbers;
+  };
+
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+      setInputPage('');
+    }
+  };
+
+  const handleInputPageChange = (event) => {
+    setInputPage(event.target.value);
+  };
+
+  const handleGoToPage = () => {
+    const pageNumber = parseInt(inputPage, 10);
+    if (!isNaN(pageNumber)) {
+      handlePageChange(pageNumber);
+    }
   };
 
   return (
@@ -117,6 +203,9 @@ function Dashboard() {
               />
               <div className="d-flex align-items-center">
                 <UploadExcelPopup uploadFile={upload} isLoading={isLoadingUpload} />
+                <button className="btn btn-primary me-2" onClick={handleBulkDownload} disabled={selectedFiles.length === 0 || isLoadingDownload}>
+                  {isLoadingDownload ? <span className="spinner-border spinner-border-sm ms-2"></span> : <FontAwesomeIcon icon={faDownload} />}
+                </button>
                 <button className="btn btn-danger" onClick={handleDelete} disabled={selectedFiles.length === 0 || isLoadingDelete}>
                   {isLoadingDelete ? <span className="spinner-border spinner-border-sm ms-2"></span> : <FontAwesomeIcon icon={faTrash} />}
                 </button>
@@ -187,6 +276,9 @@ function Dashboard() {
                                 <button className="dropdown-item" onClick={() => showRenameInput(file.id, file.name)} disabled={isLoadingRename}>
                                   Rename
                                 </button>
+                                <button className="dropdown-item" onClick={() => handleDownloadFile(file.id, file.name)}>
+                                  Download
+                                </button>
                                 <button className="dropdown-item" onClick={() => console.log('Export:', file.name)} hidden>
                                   Export
                                 </button>
@@ -207,10 +299,52 @@ function Dashboard() {
               </table>
             )}
           </div>
+          <div className="d-flex justify-content-center align-items-center mt-3">
+            {isLoadingFiles ? (
+              <div className="text-center">Loading pagination...<span className="spinner-border spinner-border-sm ms-2"></span></div>
+            ) : (
+              <>
+                <nav>
+                  <ul className="pagination mb-0">
+                    <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                      <button className="page-link" onClick={() => handlePageChange(currentPage - 1)}>
+                        Previous
+                      </button>
+                    </li>
+                    {getPaginationNumbers().map((pageNumber, index) => (
+                      <li className={`page-item ${currentPage === pageNumber ? 'active' : ''}`} key={index}>
+                        {pageNumber === '...' ? (
+                          <span className="page-link">...</span>
+                        ) : (
+                          <button className="page-link" onClick={() => handlePageChange(pageNumber)}>
+                            {pageNumber}
+                          </button>
+                        )}
+                      </li>
+                    ))}
+                    <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                      <button className="page-link" onClick={() => handlePageChange(currentPage + 1)}>
+                        Next
+                      </button>
+                    </li>
+                  </ul>
+                </nav>
+                <div className="d-flex align-items-center ms-3">
+                  <span className="me-2">Go to:</span>
+                  <input
+                    type="number"
+                    className="form-control me-2 w-25"
+                    value={inputPage}
+                    onChange={handleInputPageChange}
+                    placeholder="Page"
+                  />
+                  <button className="btn btn-primary me-2" onClick={handleGoToPage}>Go</button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </main>
   );
 }
-
-export default Dashboard;
