@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash, faSortAlphaAsc, faSortAlphaDesc, faSortNumericAsc, faSortNumericDesc, faEllipsisVertical, faDownload } from '@fortawesome/free-solid-svg-icons';
 import UploadExcelPopup from '../components/UploadExcelPopup';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
+import LiveSearchComponent from '../components/LiveSearchComponent';
 import { useNavigate } from "react-router-dom";
 import { useGetFiles, useDeleteFile, useRenameFile, useUploadFile, useDownloadFile } from '../hooks/FileHooks.js';
 import { toast } from 'react-toastify';
@@ -25,11 +26,12 @@ export function File({ file, onFileClick }) {
 export default function Dashboard() {
   const navigate = useNavigate();
   const [sortByDate, setSortByDate] = useState(false);
-  const [isDescending, setIsDescending] = useState(false);
+  const [isDescending, setIsDescending] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [inputPage, setInputPage] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const itemsPerPage = 15;
-  const { files, totalFiles, isLoading: isLoadingFiles, refreshItems } = useGetFiles(currentPage - 1, itemsPerPage, sortByDate, isDescending);
+  const { files, totalFiles, isLoading: isLoadingFiles, refreshItems } = useGetFiles(currentPage - 1, itemsPerPage, sortByDate, isDescending, searchTerm);
   const { rename, isLoading: isLoadingRename } = useRenameFile(refreshItems);
   const { remove, isLoading: isLoadingDelete } = useDeleteFile(refreshItems);
   const { upload, isLoading: isLoadingUpload } = useUploadFile(refreshItems);
@@ -107,14 +109,6 @@ export default function Dashboard() {
     }
   };
 
-  const handleNextPage = () => {
-    setCurrentPage((prevPage) => prevPage + 1);
-  };
-
-  const handlePreviousPage = () => {
-    setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
-  };
-
   const handleSelectFile = (fileId) => {
     setSelectedFiles((prevSelectedFiles) =>
       prevSelectedFiles.includes(fileId)
@@ -132,9 +126,9 @@ export default function Dashboard() {
     setSortByDate(false);
   };
 
-  const HandleSortByDate = () => {
-    setSortByDate(prev => !prev);
-    setIsDescending(false);
+  const handleSortByDate = () => {
+    setSortByDate(true);
+    setIsDescending(prev => !prev);
   };
 
   const handleDownloadFile = async (fileId, fileName) => {
@@ -215,6 +209,7 @@ export default function Dashboard() {
     <main className="container">
       <div className="card mb-3">
         <div className="card-body">
+          <LiveSearchComponent onSearch={setSearchTerm} />
           <div className="mb-4 d-flex flex-column">
             <div className="d-flex flex-row-reverse mb-4">
               <input
@@ -250,8 +245,8 @@ export default function Dashboard() {
                       File Name 
                       <FontAwesomeIcon icon={isDescending ? faSortAlphaDesc : faSortAlphaAsc} className="ms-1" />
                     </th>
-                    <th scope="col" onClick={HandleSortByDate} style={{ cursor: 'pointer' }}>
-                      Last Updated <FontAwesomeIcon icon={sortByDate ? faSortNumericAsc : faSortNumericDesc} />
+                    <th scope="col" onClick={handleSortByDate} style={{ cursor: 'pointer' }}>
+                      Last Updated <FontAwesomeIcon icon={sortByDate ? (isDescending ? faSortNumericDesc : faSortNumericAsc) : faSortNumericAsc} />
                     </th>
                     <th scope="col"></th>
                   </tr>
@@ -326,6 +321,9 @@ export default function Dashboard() {
               <div className="text-center">Loading pagination...<span className="spinner-border spinner-border-sm ms-2"></span></div>
             ) : (
               <>
+                <div className="me-3">
+                  <div>Total {totalFiles} files </div>
+                </div>
                 <nav>
                   <ul className="pagination mb-0">
                     <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>

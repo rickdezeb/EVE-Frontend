@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import * as productService from "../services/ProductService";
+import * as fileService from "../services/FileService";
 
-export const useGetProducts = (fileId, page = 0, pageSize = 15, isDescending = false) => {
+export const useGetProducts = (fileId, page = 0, pageSize = 15, isDescending = false, searchTerm = '') => {
     const [products, setProducts] = useState([]);
     const [totalProducts, setTotalProducts] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
@@ -31,9 +32,20 @@ export const useGetProducts = (fileId, page = 0, pageSize = 15, isDescending = f
         setRefresh((prevRefresh) => !prevRefresh);
     };
 
-    return { products, totalProducts, isLoading, refreshItems };
-};
+    const searchProducts = async (searchTerm) => {
+        try {
+            setIsLoading(true);
+            const data = await fileService.getFiles(page, pageSize, false, false, searchTerm);
+            setProducts(data);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
+    return { products, totalProducts, isLoading, refreshItems, searchProducts };
+};
 
 export const useDeleteProduct = (refreshItems) => {
     const [isLoading, setIsLoading] = useState(false);
@@ -69,4 +81,4 @@ export const useAddProduct = (refreshItems) => {
         }
     }
     return { add, isLoading }; 
-}
+};

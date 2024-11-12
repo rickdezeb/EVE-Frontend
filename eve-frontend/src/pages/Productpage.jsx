@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useGetProducts, useAddProduct, useDeleteProduct } from '../hooks/ProductHooks';
 import { useDownloadFile } from '../hooks/FileHooks';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
+import LiveSearchComponent from '../components/LiveSearchComponent';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -36,7 +37,7 @@ export default function ProductPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [inputPage, setInputPage] = useState('');
   const itemsPerPage = 15;
-  const { products, totalProducts, isLoading: isLoadingProducts, refreshItems } = useGetProducts(file?.id, currentPage - 1, itemsPerPage, isDescending);
+  const { products, totalProducts, isLoading: isLoadingProducts, refreshItems, searchProducts } = useGetProducts(file?.id, currentPage - 1, itemsPerPage, isDescending);
   const { remove, isLoading: isLoadingDelete } = useDeleteProduct(refreshItems);
   const { add, isLoading: isLoadingAdd } = useAddProduct(refreshItems);
   const { download, isLoading: isLoadingDownload } = useDownloadFile();
@@ -157,6 +158,10 @@ export default function ProductPage() {
     }
   };
 
+  const handleSearch = (searchTerm) => {
+    searchProducts(searchTerm);
+  };
+
   if (isLoadingProducts) {
     return <div className="text-center">Loading products...<span className="spinner-border spinner-border-sm ms-2"></span></div>;
   }
@@ -165,6 +170,7 @@ export default function ProductPage() {
     <main className="container mt-4">
       <div className="card mb-3">
         <div className="card-body">
+          <LiveSearchComponent onSearch={handleSearch} />
           <div className="d-flex justify-content-between align-items-center mb-4">
             <h4>{file?.name}</h4>
             <div className="d-flex">
@@ -210,6 +216,9 @@ export default function ProductPage() {
               <div className="text-center">Loading pagination...<span className="spinner-border spinner-border-sm ms-2"></span></div>
             ) : (
               <>
+                <div className="me-3">
+                  <div>Total {totalProducts} products </div>
+                </div>
                 <nav>
                   <ul className="pagination mb-0">
                     <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
