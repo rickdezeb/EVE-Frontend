@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
-import * as fileService from '../Services/FileService.js';
+import * as fileService from '../services/FileService';
 
-export const useGetFiles = (page = 0, pageSize = 15, sortByDate = false, isDescending = false) => {
+export const useGetFiles = (page = 0, pageSize = 15, sortByDate = false, isDescending = false, searchTerm = '') => {
     const [files, setFiles] = useState([]);
     const [totalFiles, setTotalFiles] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
@@ -11,7 +11,7 @@ export const useGetFiles = (page = 0, pageSize = 15, sortByDate = false, isDesce
         try {
             setIsLoading(true);
             const [data, count] = await Promise.all([
-                fileService.getFiles(page, pageSize, sortByDate, isDescending),
+                fileService.getFiles(page, pageSize, sortByDate, isDescending, searchTerm),
                 fileService.getFileCount()
             ]);
             console.log(`Retrieved files for page ${page}:`, data);
@@ -27,7 +27,7 @@ export const useGetFiles = (page = 0, pageSize = 15, sortByDate = false, isDesce
     useEffect(() => {
         console.log(`Fetching files for page ${page}`);
         retrieve();
-    }, [refresh, page, sortByDate, isDescending]);
+    }, [refresh, page, sortByDate, isDescending, searchTerm]);
 
     const refreshItems = () => {
         setRefresh((prevRefresh) => !prevRefresh);
