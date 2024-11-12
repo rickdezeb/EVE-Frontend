@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react"
-import * as productService from "../services/ProductService"
+import { useEffect, useState } from "react";
+import * as productService from "../services/ProductService";
 
 export const useGetProducts = (fileId, page = 0, pageSize = 15, isDescending = false) => {
     const [products, setProducts] = useState([]);
@@ -34,41 +34,38 @@ export const useGetProducts = (fileId, page = 0, pageSize = 15, isDescending = f
     return { products, totalProducts, isLoading, refreshItems };
 };
 
+
 export const useDeleteProduct = (refreshItems) => {
-    const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
     const [isLoading, setIsLoading] = useState(false);
     const remove = async (id) => {
         try {
             setIsLoading(true);
             await productService.deleteProduct(id);
+            await refreshItems();
         }
         catch (error) {
             console.error(error);
         }
         finally {
-            await delay(100);
             setIsLoading(false);
-            refreshItems();
         }
     }
     return { remove, isLoading }; 
 }
 
 export const useAddProduct = (refreshItems) => {
-    const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
     const [isLoading, setIsLoading] = useState(false);
     const add = async (fileId) => {
         try {
             setIsLoading(true);
             await productService.addProduct(fileId);
+            await refreshItems();
         }
         catch (error) {
             console.error(error);
         }
         finally {
-            await delay(100);
             setIsLoading(false)
-            refreshItems();
         }
     }
     return { add, isLoading }; 

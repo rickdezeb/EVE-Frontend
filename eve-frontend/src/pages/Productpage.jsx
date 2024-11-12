@@ -4,6 +4,9 @@ import { faDownload, faPlus, faTrash, faSortAlphaAsc, faSortAlphaDesc, faSortNum
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useGetProducts, useAddProduct, useDeleteProduct } from '../hooks/ProductHooks';
 import { useDownloadFile } from '../hooks/FileHooks';
+import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Property = ({ product, file }) => {
   const navigate = useNavigate();
@@ -39,14 +42,18 @@ export default function ProductPage() {
   const { download, isLoading: isLoadingDownload } = useDownloadFile();
 
   const [selectedProducts, setSelectedProducts] = useState([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const handleDeleteProducts = async () => {
     try {
       await Promise.all(selectedProducts.map(productId => remove(productId)));
       setSelectedProducts([]);
+      setShowDeleteModal(false);
+      toast.error("Selected products deleted.", { theme: "colored" });
     }
     catch (error) {
       console.error(error);
+      toast.error("Failed to delete products.", { theme: "colored" });
     }
   };
 
@@ -54,9 +61,11 @@ export default function ProductPage() {
     e.preventDefault();
     try {
       await add(file.id);
+      toast.success("Product added successfully.");
     }
     catch (error) {
       console.error(error);
+      toast.error("Failed to add product.");
     }
   };
 
@@ -165,7 +174,7 @@ export default function ProductPage() {
               <button type="button" className="btn btn-primary me-2" onClick={handleAddProduct}>
                 {isLoadingAdd ? <span className="spinner-border spinner-border-sm"></span> : <FontAwesomeIcon icon={faPlus} className="text-white" />}
               </button>
-              <button className="btn btn-danger" onClick={handleDeleteProducts} disabled={selectedProducts.length === 0}>
+              <button className="btn btn-danger" onClick={() => setShowDeleteModal(true)} disabled={selectedProducts.length === 0}>
                 {isLoadingDelete ? <span className="spinner-border spinner-border-sm"></span> : <FontAwesomeIcon icon={faTrash} />}
               </button>
             </div>
@@ -242,6 +251,12 @@ export default function ProductPage() {
           </div>
         </div>
       </div>
+
+      <DeleteConfirmationModal
+        show={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteProducts}
+      />
     </main>
   );
 }
