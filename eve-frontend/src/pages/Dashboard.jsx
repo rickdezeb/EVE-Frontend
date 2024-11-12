@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash, faSortAlphaAsc, faSortAlphaDesc, faSortNumericAsc, faSortNumericDesc, faEllipsisVertical, faDownload } from '@fortawesome/free-solid-svg-icons';
 import UploadExcelPopup from '../components/UploadExcelPopup';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
-import LiveSearchComponent from '../components/LiveSearchComponent';
+import LivesearchComponent from '../components/LiveSearchComponent';
 import { useNavigate } from "react-router-dom";
 import { useGetFiles, useDeleteFile, useRenameFile, useUploadFile, useDownloadFile } from '../hooks/FileHooks.js';
 import { toast } from 'react-toastify';
@@ -65,6 +65,16 @@ export default function Dashboard() {
     } catch (error) {
       console.error(error);
       toast.error("Failed to delete files.", { theme: "colored" });
+    }
+  };
+
+  const handleDeleteFile = async (fileId) => {
+    try {
+      await remove(fileId);
+      toast.error("File deleted.", { theme: "colored" });
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to delete file.", { theme: "colored" });
     }
   };
 
@@ -209,7 +219,7 @@ export default function Dashboard() {
     <main className="container">
       <div className="card mb-3">
         <div className="card-body">
-          <LiveSearchComponent onSearch={setSearchTerm} />
+          <LivesearchComponent onSearch={setSearchTerm} />
           <div className="mb-4 d-flex flex-column">
             <div className="d-flex flex-row-reverse mb-4">
               <input
@@ -282,7 +292,7 @@ export default function Dashboard() {
                             <File file={file} onFileClick={() => loadProductPage(file)} />
                           </td>
                         )}
-                        <td>{new Date(file.lastUpdated).toLocaleDateString()}</td>
+                        <td>{new Date(file.lastUpdated).toLocaleString()}</td>
                         <td className="text-end">
                           <button className="btn btn-link text-black p-0" onClick={() => toggleDropdown(index)}>
                             <FontAwesomeIcon icon={faEllipsisVertical} />
@@ -295,6 +305,9 @@ export default function Dashboard() {
                                 </button>
                                 <button className="dropdown-item" onClick={() => handleDownloadFile(file.id, file.name)}>
                                   Download
+                                </button>
+                                <button className="dropdown-item" onClick={() => handleDeleteFile(file.id)}>
+                                  Delete
                                 </button>
                                 <button className="dropdown-item" onClick={() => console.log('Export:', file.name)} hidden>
                                   Export
@@ -321,9 +334,6 @@ export default function Dashboard() {
               <div className="text-center">Loading pagination...<span className="spinner-border spinner-border-sm ms-2"></span></div>
             ) : (
               <>
-                <div className="me-3">
-                  <div>Total {totalFiles} files </div>
-                </div>
                 <nav>
                   <ul className="pagination mb-0">
                     <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
