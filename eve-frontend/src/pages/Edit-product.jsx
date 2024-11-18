@@ -43,10 +43,10 @@ function Editpage() {
 
     try {
       await Promise.all(updatePromises);
-      toast.success("Properties updated successfully.");
+      toast.success("Properties updated successfully.", { theme: "colored" });
     } catch (error) {
       console.error(error);
-      toast.error("Failed to update properties.");
+      toast.error("Failed to update properties.", { theme: "colored" });
     }
   };
 
@@ -59,6 +59,7 @@ function Editpage() {
   const getPaginationNumbers = () => {
     const paginationNumbers = [];
     const maxVisible = 5;
+
     const halfVisible = Math.floor(maxVisible / 2);
   
     let startPage = Math.max(1, currentPage - halfVisible);
@@ -87,7 +88,7 @@ function Editpage() {
       }
       paginationNumbers.push(totalPages);
     }
-  
+
     return paginationNumbers;
   };
 
@@ -95,6 +96,7 @@ function Editpage() {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
       setInputPage('');
+
       setSelectedProductId(products[0]?.id);
     }
   };
@@ -153,6 +155,7 @@ function Editpage() {
                         Previous
                       </button>
                     </li>
+
                       {getPaginationNumbers().map((pageNumber) => (
                     <li className={`page-item ${currentPage === pageNumber ? 'active' : ''}`} key={pageNumber}>
                       <button
@@ -180,6 +183,7 @@ function Editpage() {
                     onChange={handleInputPageChange}
                     placeholder="Product"
                   />
+
                   <button className="btn btn-primary me-2" onClick={handleGoToPage} disabled={!inputPage}>Go</button>
                   <button className="btn btn-success" onClick={handleSave}>Save</button>
                 </div>

@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDownload, faPlus, faTrash, faSortAlphaAsc, faSortAlphaDesc, faSortNumericAsc, faSortNumericDesc } from '@fortawesome/free-solid-svg-icons';
+
+import { faDownload, faPlus, faTrash, faSortAlphaAsc, faSortNumericAsc, faSortNumericDesc } from '@fortawesome/free-solid-svg-icons';
+
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useGetProducts, useAddProduct, useDeleteProduct } from '../hooks/ProductHooks';
 import { useDownloadFile } from '../hooks/FileHooks';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
-import LiveSearchComponent from '../components/LiveSearchComponent';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -14,12 +15,13 @@ const Property = ({ product, file }) => {
   const loadEditPage = () => {
     navigate("/editpage", { state: { product, file } });
   };
-  
+
+
   return (
     <div>
-      <span 
-        onClick={loadEditPage} 
-        className="text-primary" 
+      <span
+        onClick={loadEditPage}
+        className="text-primary"
         style={{ cursor: 'pointer' }}
       >
         {product.id}
@@ -48,11 +50,13 @@ export default function ProductPage() {
   const handleDeleteProducts = async () => {
     try {
       await Promise.all(selectedProducts.map(productId => remove(productId)));
+      const updatedProducts = products.filter(product => !selectedProducts.includes(product.id));
+      refreshItems(updatedProducts); 
+  
       setSelectedProducts([]);
       setShowDeleteModal(false);
-      toast.error("Selected products deleted.", { theme: "colored" });
-    }
-    catch (error) {
+      toast.error("File deleted.", { theme: "colored" });
+    } catch (error) {
       console.error(error);
       toast.error("Failed to delete products.", { theme: "colored" });
     }
@@ -62,19 +66,20 @@ export default function ProductPage() {
     e.preventDefault();
     try {
       await add(file.id);
-      toast.success("Product added successfully.");
-    }
-    catch (error) {
+      refreshItems();
+      toast.success("Product added successfully.", { theme: "colored" });
+    } catch (error) {
       console.error(error);
-      toast.error("Failed to add product.");
+      toast.error("Failed to add product.", { theme: "colored" });
+
     }
   };
 
   const handleSelectAllProducts = (e) => {
     if (e.target.checked) {
       setSelectedProducts(products.map(product => product.id));
-    }
-    else {
+
+    } else {
       setSelectedProducts([]);
     }
   };
@@ -158,9 +163,6 @@ export default function ProductPage() {
     }
   };
 
-  const handleSearch = (searchTerm) => {
-    searchProducts(searchTerm);
-  };
 
   if (isLoadingProducts) {
     return <div className="text-center">Loading products...<span className="spinner-border spinner-border-sm ms-2"></span></div>;
@@ -189,7 +191,8 @@ export default function ProductPage() {
             <thead>
               <tr>
                 <th scope="col"><input type="checkbox" className="me-2" onChange={handleSelectAllProducts} checked={selectedProducts.length === products.length && products.length > 0} /></th>
-                <th scope="col">Product Identifier <FontAwesomeIcon icon={faSortAlphaAsc} hidden/></th>
+                <th scope="col">Product Identifier</th>
+
                 <th scope="col" onClick={handleSortClick} style={{ cursor: 'pointer' }}>
                   Last Updated <FontAwesomeIcon icon={isDescending ? faSortNumericDesc : faSortNumericAsc} />
                 </th>
@@ -202,6 +205,7 @@ export default function ProductPage() {
                   <td><input type="checkbox" className="me-2" checked={selectedProducts.includes(product.id)} onChange={() => handleSelectProduct(product.id)} /> </td>
                   <td><Property product={product} file={file} /></td>
                   <td>{new Date(product.lastUpdated).toLocaleString()}</td>
+
                 </tr>
               )) : (
                 <tr>
@@ -230,6 +234,7 @@ export default function ProductPage() {
                         {pageNumber === '...' ? (
                           <span className="page-link">...</span>
                         ) : (
+
                           <button className="page-link" 
                           style={{ minWidth: '45px', textAlign: 'center', margin: '0 2px' }}
                           onClick={() => handlePageChange(pageNumber)}>
@@ -245,6 +250,7 @@ export default function ProductPage() {
                     </li>
                   </ul>
                 </nav>
+
                 <div className="d-flex align-items-center ms-3">
                   <span className="me-2">Go to:</span>
                   <input
@@ -264,9 +270,13 @@ export default function ProductPage() {
 
       <DeleteConfirmationModal
         show={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
+
+        onHide={() => setShowDeleteModal(false)}
         onConfirm={handleDeleteProducts}
+        itemCount={selectedProducts.length}
+        itemType="products"
       />
     </main>
   );
 }
+
