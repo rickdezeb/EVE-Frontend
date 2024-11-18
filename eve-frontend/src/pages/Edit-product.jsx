@@ -59,20 +59,35 @@ function Editpage() {
   const getPaginationNumbers = () => {
     const paginationNumbers = [];
     const maxVisible = 5;
-    let startPage = Math.max(1, currentPage - 2);
-
-    if (totalPages > maxVisible) {
-      if (startPage + maxVisible - 1 > totalPages) {
-        startPage = totalPages - maxVisible + 1;
-      }
-      if (startPage < 1) {
-        startPage = 1;
+    const halfVisible = Math.floor(maxVisible / 2);
+  
+    let startPage = Math.max(1, currentPage - halfVisible);
+    let endPage = Math.min(totalPages, currentPage + halfVisible);
+  
+    if (startPage === 1) {
+      endPage = Math.min(totalPages, startPage + maxVisible - 1);
+    } else if (endPage === totalPages) {
+      startPage = Math.max(1, endPage - maxVisible + 1);
+    }
+  
+    if (startPage > 1) {
+      paginationNumbers.push(1);
+      if (startPage > 2) {
+        paginationNumbers.push('...');
       }
     }
-
-    for (let i = 0; i < maxVisible && startPage <= totalPages; i++, startPage++) {
-      paginationNumbers.push(startPage);
+  
+    for (let i = startPage; i <= endPage; i++) {
+      paginationNumbers.push(i);
     }
+  
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) {
+        paginationNumbers.push('...');
+      }
+      paginationNumbers.push(totalPages);
+    }
+  
     return paginationNumbers;
   };
 
