@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 import { faDownload, faPlus, faTrash, faSortAlphaAsc, faSortNumericAsc, faSortNumericDesc } from '@fortawesome/free-solid-svg-icons';
+
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useGetProducts, useAddProduct, useDeleteProduct } from '../hooks/ProductHooks';
 import { useDownloadFile } from '../hooks/FileHooks';
@@ -13,6 +15,7 @@ const Property = ({ product, file }) => {
   const loadEditPage = () => {
     navigate("/editpage", { state: { product, file } });
   };
+
 
   return (
     <div>
@@ -58,7 +61,7 @@ export default function ProductPage() {
       toast.error("Failed to delete products.", { theme: "colored" });
     }
   };
-  
+
   const handleAddProduct = async (e) => {
     e.preventDefault();
     try {
@@ -68,12 +71,14 @@ export default function ProductPage() {
     } catch (error) {
       console.error(error);
       toast.error("Failed to add product.", { theme: "colored" });
+
     }
   };
 
   const handleSelectAllProducts = (e) => {
     if (e.target.checked) {
       setSelectedProducts(products.map(product => product.id));
+
     } else {
       setSelectedProducts([]);
     }
@@ -158,6 +163,7 @@ export default function ProductPage() {
     }
   };
 
+
   if (isLoadingProducts) {
     return <div className="text-center">Loading products...<span className="spinner-border spinner-border-sm ms-2"></span></div>;
   }
@@ -186,6 +192,7 @@ export default function ProductPage() {
               <tr>
                 <th scope="col"><input type="checkbox" className="me-2" onChange={handleSelectAllProducts} checked={selectedProducts.length === products.length && products.length > 0} /></th>
                 <th scope="col">Product Identifier</th>
+
                 <th scope="col" onClick={handleSortClick} style={{ cursor: 'pointer' }}>
                   Last Updated <FontAwesomeIcon icon={isDescending ? faSortNumericDesc : faSortNumericAsc} />
                 </th>
@@ -197,7 +204,8 @@ export default function ProductPage() {
                 <tr key={product.id}>
                   <td><input type="checkbox" className="me-2" checked={selectedProducts.includes(product.id)} onChange={() => handleSelectProduct(product.id)} /> </td>
                   <td><Property product={product} file={file} /></td>
-                  <td>{new Date(product.lastUpdated).toLocaleDateString()}</td>
+                  <td>{new Date(product.lastUpdated).toLocaleString()}</td>
+
                 </tr>
               )) : (
                 <tr>
@@ -226,7 +234,10 @@ export default function ProductPage() {
                         {pageNumber === '...' ? (
                           <span className="page-link">...</span>
                         ) : (
-                          <button className="page-link" onClick={() => handlePageChange(pageNumber)}>
+
+                          <button className="page-link" 
+                          style={{ minWidth: '45px', textAlign: 'center', margin: '0 2px' }}
+                          onClick={() => handlePageChange(pageNumber)}>
                             {pageNumber}
                           </button>
                         )}
@@ -239,6 +250,18 @@ export default function ProductPage() {
                     </li>
                   </ul>
                 </nav>
+
+                <div className="d-flex align-items-center ms-3">
+                  <span className="me-2">Go to:</span>
+                  <input
+                    type="number"
+                    className="form-control me-2 w-25"
+                    value={inputPage}
+                    onChange={handleInputPageChange}
+                    placeholder="Page"
+                  />
+                  <button className="btn btn-primary me-2" onClick={handleGoToPage} disabled={!inputPage}>Go</button>
+                </div>
               </>
             )}
           </div>
@@ -247,6 +270,7 @@ export default function ProductPage() {
 
       <DeleteConfirmationModal
         show={showDeleteModal}
+
         onHide={() => setShowDeleteModal(false)}
         onConfirm={handleDeleteProducts}
         itemCount={selectedProducts.length}
@@ -255,3 +279,4 @@ export default function ProductPage() {
     </main>
   );
 }
+
