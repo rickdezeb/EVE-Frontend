@@ -5,7 +5,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useGetProducts, useAddProduct, useDeleteProduct } from '../hooks/ProductHooks';
 import { useDownloadFile } from '../hooks/FileHooks';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
-import LiveSearchComponent from '../components/LiveSearchComponent';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -158,9 +157,6 @@ export default function ProductPage() {
     }
   };
 
-  const handleSearch = (searchTerm) => {
-    searchProducts(searchTerm);
-  };
 
   if (isLoadingProducts) {
     return <div className="text-center">Loading products...<span className="spinner-border spinner-border-sm ms-2"></span></div>;
