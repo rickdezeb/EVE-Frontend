@@ -42,6 +42,7 @@ export default function Dashboard() {
   const [dropdownOpen, setDropdownOpen] = useState(null);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [fileToDelete, setFileToDelete] = useState(null);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -68,9 +69,11 @@ export default function Dashboard() {
     }
   };
 
-  const handleDeleteFile = async (fileId) => {
+  const handleDeleteFile = async () => {
     try {
-      await remove(fileId);
+      await remove(fileToDelete);
+      setFileToDelete(null);
+      setShowDeleteModal(false);
       toast.error("File deleted.", { theme: "colored" });
     } catch (error) {
       console.error(error);
@@ -117,6 +120,14 @@ export default function Dashboard() {
     } else {
       setSelectedFiles([]);
     }
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage((prevPage) => prevPage + 1);
+  };
+
+  const handlePreviousPage = () => {
+    setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
   };
 
   const handleSelectFile = (fileId) => {
@@ -306,7 +317,7 @@ export default function Dashboard() {
                                 <button className="dropdown-item" onClick={() => handleDownloadFile(file.id, file.name)}>
                                   Download
                                 </button>
-                                <button className="dropdown-item" onClick={() => handleDeleteFile(file.id)}>
+                                <button className="dropdown-item" onClick={() => { setFileToDelete(file.id); setShowDeleteModal(true); }}>
                                   Delete
                                 </button>
                                 <button className="dropdown-item" onClick={() => console.log('Export:', file.name)} hidden>
@@ -346,7 +357,10 @@ export default function Dashboard() {
                         {pageNumber === '...' ? (
                           <span className="page-link">...</span>
                         ) : (
-                          <button className="page-link" onClick={() => handlePageChange(pageNumber)}>
+                          <button 
+                          className="page-link" 
+                          style={{ minWidth: '45px', textAlign: 'center', margin: '0 2px' }}
+                          onClick={() => handlePageChange(pageNumber)}>
                             {pageNumber}
                           </button>
                         )}
@@ -368,7 +382,7 @@ export default function Dashboard() {
                     onChange={handleInputPageChange}
                     placeholder="Page"
                   />
-                  <button className="btn btn-primary me-2" onClick={handleGoToPage}>Go</button>
+                  <button className="btn btn-primary me-2" onClick={handleGoToPage} disabled={!inputPage}>Go</button>
                 </div>
               </>
             )}
@@ -379,7 +393,7 @@ export default function Dashboard() {
       <DeleteConfirmationModal
         show={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
-        onConfirm={handleDelete}
+        onConfirm={fileToDelete ? handleDeleteFile : handleDelete}
       />
     </main>
   );

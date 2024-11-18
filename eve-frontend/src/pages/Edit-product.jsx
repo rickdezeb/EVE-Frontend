@@ -59,20 +59,35 @@ function Editpage() {
   const getPaginationNumbers = () => {
     const paginationNumbers = [];
     const maxVisible = 5;
-    let startPage = Math.max(1, currentPage - 2);
-
-    if (totalPages > maxVisible) {
-      if (startPage + maxVisible - 1 > totalPages) {
-        startPage = totalPages - maxVisible + 1;
-      }
-      if (startPage < 1) {
-        startPage = 1;
+    const halfVisible = Math.floor(maxVisible / 2);
+  
+    let startPage = Math.max(1, currentPage - halfVisible);
+    let endPage = Math.min(totalPages, currentPage + halfVisible);
+  
+    if (startPage === 1) {
+      endPage = Math.min(totalPages, startPage + maxVisible - 1);
+    } else if (endPage === totalPages) {
+      startPage = Math.max(1, endPage - maxVisible + 1);
+    }
+  
+    if (startPage > 1) {
+      paginationNumbers.push(1);
+      if (startPage > 2) {
+        paginationNumbers.push('...');
       }
     }
-
-    for (let i = 0; i < maxVisible && startPage <= totalPages; i++, startPage++) {
-      paginationNumbers.push(startPage);
+  
+    for (let i = startPage; i <= endPage; i++) {
+      paginationNumbers.push(i);
     }
+  
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) {
+        paginationNumbers.push('...');
+      }
+      paginationNumbers.push(totalPages);
+    }
+  
     return paginationNumbers;
   };
 
@@ -80,7 +95,7 @@ function Editpage() {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
       setInputPage('');
-      setSelectedProductId(products[0]?.id); // Update selectedProductId to the first product on the new page
+      setSelectedProductId(products[0]?.id);
     }
   };
 
@@ -138,16 +153,20 @@ function Editpage() {
                         Previous
                       </button>
                     </li>
-                    {getPaginationNumbers().map((pageNumber) => (
-                      <li className={`page-item ${currentPage === pageNumber ? 'active' : ''}`} key={pageNumber}>
-                        <button className="page-link" onClick={() => handlePageChange(pageNumber)}>
-                          {pageNumber}
-                        </button>
-                      </li>
-                    ))}
+                      {getPaginationNumbers().map((pageNumber) => (
+                    <li className={`page-item ${currentPage === pageNumber ? 'active' : ''}`} key={pageNumber}>
+                      <button
+                        className="page-link"
+                        style={{ minWidth: '45px', textAlign: 'center', margin: '0 2px' }}
+                        onClick={() => handlePageChange(pageNumber)}
+                        >
+                        {pageNumber}
+                      </button>
+                    </li>
+                      ))}
                     <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
                       <button className="page-link" onClick={() => handlePageChange(currentPage + 1)}>
-                        Next
+                      Next
                       </button>
                     </li>
                   </ul>
@@ -161,7 +180,7 @@ function Editpage() {
                     onChange={handleInputPageChange}
                     placeholder="Product"
                   />
-                  <button className="btn btn-primary me-2" onClick={handleGoToPage}>Go</button>
+                  <button className="btn btn-primary me-2" onClick={handleGoToPage} disabled={!inputPage}>Go</button>
                   <button className="btn btn-success" onClick={handleSave}>Save</button>
                 </div>
               </>

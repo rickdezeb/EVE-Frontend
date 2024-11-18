@@ -230,7 +230,9 @@ export default function ProductPage() {
                         {pageNumber === '...' ? (
                           <span className="page-link">...</span>
                         ) : (
-                          <button className="page-link" onClick={() => handlePageChange(pageNumber)}>
+                          <button className="page-link" 
+                          style={{ minWidth: '45px', textAlign: 'center', margin: '0 2px' }}
+                          onClick={() => handlePageChange(pageNumber)}>
                             {pageNumber}
                           </button>
                         )}
@@ -252,7 +254,7 @@ export default function ProductPage() {
                     onChange={handleInputPageChange}
                     placeholder="Page"
                   />
-                  <button className="btn btn-primary me-2" onClick={handleGoToPage}>Go</button>
+                  <button className="btn btn-primary me-2" onClick={handleGoToPage} disabled={!inputPage}>Go</button>
                 </div>
               </>
             )}
