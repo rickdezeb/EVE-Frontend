@@ -305,7 +305,7 @@ export default function Dashboard() {
                         )}
                         <td>{new Date(file.lastUpdated).toLocaleString()}</td>
                         <td className="text-end">
-                          <button className="btn btn-link text-black p-0" onClick={() => toggleDropdown(index)}>
+                        <button className="btn btn-link text-black p-0" style={{ padding: '10px', width: '40px', height: '40px' }} onClick={() => toggleDropdown(index)}>
                             <FontAwesomeIcon icon={faEllipsisVertical} />
                           </button>
                           {dropdownOpen === index && (
