@@ -254,7 +254,7 @@ export default function ProductPage() {
                     onChange={handleInputPageChange}
                     placeholder="Page"
                   />
-                  <button className="btn btn-primary me-2" onClick={handleGoToPage}>Go</button>
+                  <button className="btn btn-primary me-2" onClick={handleGoToPage} disabled={!inputPage}>Go</button>
                 </div>
               </>
             )}

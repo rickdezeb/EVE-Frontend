@@ -165,7 +165,7 @@ function Editpage() {
                     onChange={handleInputPageChange}
                     placeholder="Product"
                   />
-                  <button className="btn btn-primary me-2" onClick={handleGoToPage}>Go</button>
+                  <button className="btn btn-primary me-2" onClick={handleGoToPage} disabled={!inputPage}>Go</button>
                   <button className="btn btn-success" onClick={handleSave}>Save</button>
                 </div>
               </>
