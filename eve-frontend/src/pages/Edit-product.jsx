@@ -80,7 +80,7 @@ function Editpage() {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
       setInputPage('');
-      setSelectedProductId(products[0]?.id); // Update selectedProductId to the first product on the new page
+      setSelectedProductId(products[0]?.id);
     }
   };
 
@@ -138,16 +138,20 @@ function Editpage() {
                         Previous
                       </button>
                     </li>
-                    {getPaginationNumbers().map((pageNumber) => (
-                      <li className={`page-item ${currentPage === pageNumber ? 'active' : ''}`} key={pageNumber}>
-                        <button className="page-link" onClick={() => handlePageChange(pageNumber)}>
-                          {pageNumber}
-                        </button>
-                      </li>
-                    ))}
+                      {getPaginationNumbers().map((pageNumber) => (
+                    <li className={`page-item ${currentPage === pageNumber ? 'active' : ''}`} key={pageNumber}>
+                      <button
+                        className="page-link"
+                        style={{ minWidth: '45px', textAlign: 'center', margin: '0 2px' }}
+                        onClick={() => handlePageChange(pageNumber)}
+                        >
+                        {pageNumber}
+                      </button>
+                    </li>
+                      ))}
                     <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
                       <button className="page-link" onClick={() => handlePageChange(currentPage + 1)}>
-                        Next
+                      Next
                       </button>
                     </li>
                   </ul>
