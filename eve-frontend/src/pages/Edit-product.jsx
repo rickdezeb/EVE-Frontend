@@ -115,6 +115,7 @@ function Editpage() {
   return (
     <div className="d-flex flex-column">
       <main className="container flex-fill">
+      <h2 className="text-start">ID: {product.id}</h2>
         <div className="card mb-3">
           <div className="card-body overflow-auto" style={{ maxHeight: '75vh', minHeight: '75vh' }}>
             {isLoadingProperties ? (
