@@ -10,6 +10,7 @@ function Editpage() {
   const { product, file } = data;
 
   const [currentPage, setCurrentPage] = useState(1);
+  const [currentProduct, setCurrentProduct] = useState(product);
   const [inputPage, setInputPage] = useState('');
   const itemsPerPage = 1;
 
@@ -29,6 +30,13 @@ function Editpage() {
       setLocalProperties(properties);
     }
   }, [properties]);
+
+  useEffect(() => {
+    const selectedProduct = products.find((p) => p.id === selectedProductId);
+    if (selectedProduct) {
+      setCurrentProduct(selectedProduct);
+    }
+  }, [selectedProductId, products]);
 
   const handleInputChange = (index, event) => {
     const newProperties = [...properties];
@@ -55,32 +63,31 @@ function Editpage() {
   const currentItems = products.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(totalProducts / itemsPerPage);
 
-
   const getPaginationNumbers = () => {
     const paginationNumbers = [];
     const maxVisible = 5;
     const halfVisible = Math.floor(maxVisible / 2);
-  
+
     let startPage = Math.max(1, currentPage - halfVisible);
     let endPage = Math.min(totalPages, currentPage + halfVisible);
-  
+
     if (startPage === 1) {
       endPage = Math.min(totalPages, startPage + maxVisible - 1);
     } else if (endPage === totalPages) {
       startPage = Math.max(1, endPage - maxVisible + 1);
     }
-  
+
     if (startPage > 1) {
       paginationNumbers.push(1);
       if (startPage > 2) {
         paginationNumbers.push('...');
       }
     }
-  
+
     for (let i = startPage; i <= endPage; i++) {
       paginationNumbers.push(i);
     }
-  
+
     if (endPage < totalPages) {
       if (endPage < totalPages - 1) {
         paginationNumbers.push('...');
@@ -95,7 +102,14 @@ function Editpage() {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
       setInputPage('');
+<<<<<<< Updated upstream
       setSelectedProductId(products[0]?.id);
+=======
+
+      if (products.length > 0) {
+        setSelectedProductId(products[0]?.id);
+      }
+>>>>>>> Stashed changes
     }
   };
 
@@ -113,7 +127,7 @@ function Editpage() {
   return (
     <div className="d-flex flex-column">
       <main className="container flex-fill">
-      <h2 className="text-start">ID: {product.id}</h2>
+        <h2 className="text-start">ID: {currentProduct ? currentProduct.id : 'Laden...'}</h2>
         <div className="card mb-3">
           <div className="card-body overflow-auto" style={{ maxHeight: '75vh', minHeight: '75vh' }}>
             {isLoadingProperties ? (
@@ -154,20 +168,30 @@ function Editpage() {
                         Previous
                       </button>
                     </li>
+<<<<<<< Updated upstream
                       {getPaginationNumbers().map((pageNumber) => (
                     <li className={`page-item ${currentPage === pageNumber ? 'active' : ''}`} key={pageNumber}>
                       <button
                         className="page-link"
                         style={{ minWidth: '45px', textAlign: 'center', margin: '0 2px' }}
                         onClick={() => handlePageChange(pageNumber)}
+=======
+
+                    {getPaginationNumbers().map((pageNumber) => (
+                      <li className={`page-item ${currentPage === pageNumber ? 'active' : ''}`} key={pageNumber}>
+                        <button
+                          className="page-link"
+                          style={{ minWidth: '45px', textAlign: 'center', margin: '0 2px' }}
+                          onClick={() => handlePageChange(pageNumber)}
+>>>>>>> Stashed changes
                         >
-                        {pageNumber}
-                      </button>
-                    </li>
-                      ))}
+                          {pageNumber}
+                        </button>
+                      </li>
+                    ))}
                     <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
                       <button className="page-link" onClick={() => handlePageChange(currentPage + 1)}>
-                      Next
+                        Next
                       </button>
                     </li>
                   </ul>
