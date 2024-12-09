@@ -4,6 +4,7 @@ import { faTrash, faSortAlphaAsc, faSortAlphaDesc, faSortNumericAsc, faSortNumer
 import UploadExcelPopup from '../components/UploadExcelPopup';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 import LivesearchComponent from '../components/LiveSearchComponent';
+import Pagination from '../components/Pagination';
 import { useNavigate } from "react-router-dom";
 import { useGetFiles, useDeleteFile, useRenameFile, useUploadFile, useDownloadFile } from '../hooks/FileHooks.js';
 import { toast } from 'react-toastify';
@@ -42,8 +43,8 @@ export default function Dashboard() {
   const [dropdownOpen, setDropdownOpen] = useState(null);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [fileToDelete, setFileToDelete] = useState(null);
   const dropdownRef = useRef(null);
+  const [fileToDelete, setFileToDelete] = useState(null);
 
   useEffect(() => {
     const handleOutsideClick = (event) => {
@@ -69,11 +70,9 @@ export default function Dashboard() {
     }
   };
 
-  const handleDeleteFile = async () => {
+  const handleDeleteFile = async (fileId) => {
     try {
-      await remove(fileToDelete);
-      setFileToDelete(null);
-      setShowDeleteModal(false);
+      await remove(fileId);
       toast.error("File deleted.", { theme: "colored" });
     } catch (error) {
       console.error(error);
@@ -173,41 +172,6 @@ export default function Dashboard() {
 
   const totalPages = Math.ceil(totalFiles / itemsPerPage);
 
-  const getPaginationNumbers = () => {
-    const paginationNumbers = [];
-    const maxVisible = 5;
-    const halfVisible = Math.floor(maxVisible / 2);
-
-    let startPage = Math.max(1, currentPage - halfVisible);
-    let endPage = Math.min(totalPages, currentPage + halfVisible);
-
-    if (startPage === 1) {
-      endPage = Math.min(totalPages, startPage + maxVisible - 1);
-    } else if (endPage === totalPages) {
-      startPage = Math.max(1, endPage - maxVisible + 1);
-    }
-
-    if (startPage > 1) {
-      paginationNumbers.push(1);
-      if (startPage > 2) {
-        paginationNumbers.push('...');
-      }
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      paginationNumbers.push(i);
-    }
-
-    if (endPage < totalPages) {
-      if (endPage < totalPages - 1) {
-        paginationNumbers.push('...');
-      }
-      paginationNumbers.push(totalPages);
-    }
-
-    return paginationNumbers;
-  };
-
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
@@ -305,7 +269,7 @@ export default function Dashboard() {
                         )}
                         <td>{new Date(file.lastUpdated).toLocaleString()}</td>
                         <td className="text-end">
-                        <button className="btn btn-link text-black p-0" style={{ padding: '10px', width: '40px', height: '40px' }} onClick={() => toggleDropdown(index)}>
+                          <button className="btn btn-link text-black p-0" style={{ padding: '10px', width: '40px', height: '40px' }} onClick={() => toggleDropdown(index)}>
                             <FontAwesomeIcon icon={faEllipsisVertical} />
                           </button>
                           {dropdownOpen === index && (
@@ -317,7 +281,7 @@ export default function Dashboard() {
                                 <button className="dropdown-item" onClick={() => handleDownloadFile(file.id, file.name)}>
                                   Download
                                 </button>
-                                <button className="dropdown-item" onClick={() => { setFileToDelete(file.id); setShowDeleteModal(true); }}>
+                                <button className="dropdown-item" onClick={() => handleDeleteFile(file.id)}>
                                   Delete
                                 </button>
                                 <button className="dropdown-item" onClick={() => console.log('Export:', file.name)} hidden>
@@ -340,53 +304,15 @@ export default function Dashboard() {
               </table>
             )}
           </div>
-          <div className="d-flex justify-content-center align-items-center mt-3">
-            {isLoadingFiles ? (
-              <div className="text-center">Loading pagination...<span className="spinner-border spinner-border-sm ms-2"></span></div>
-            ) : (
-              <>
-                <nav>
-                  <ul className="pagination mb-0">
-                    <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                      <button className="page-link" onClick={() => handlePageChange(currentPage - 1)}>
-                        Previous
-                      </button>
-                    </li>
-                    {getPaginationNumbers().map((pageNumber, index) => (
-                      <li className={`page-item ${currentPage === pageNumber ? 'active' : ''}`} key={index}>
-                        {pageNumber === '...' ? (
-                          <span className="page-link">...</span>
-                        ) : (
-                          <button 
-                          className="page-link" 
-                          style={{ minWidth: '45px', textAlign: 'center', margin: '0 2px' }}
-                          onClick={() => handlePageChange(pageNumber)}>
-                            {pageNumber}
-                          </button>
-                        )}
-                      </li>
-                    ))}
-                    <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                      <button className="page-link" onClick={() => handlePageChange(currentPage + 1)}>
-                        Next
-                      </button>
-                    </li>
-                  </ul>
-                </nav>
-                <div className="d-flex align-items-center ms-3">
-                  <span className="me-2">Go to:</span>
-                  <input
-                    type="number"
-                    className="form-control me-2 w-25"
-                    value={inputPage}
-                    onChange={handleInputPageChange}
-                    placeholder="Page"
-                  />
-                  <button className="btn btn-primary me-2" onClick={handleGoToPage} disabled={!inputPage}>Go</button>
-                </div>
-              </>
-            )}
-          </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            handlePageChange={handlePageChange}
+            inputPage={inputPage}
+            handleInputPageChange={handleInputPageChange}
+            handleGoToPage={handleGoToPage}
+            showSaveButton={false}
+          />
         </div>
       </div>
 
