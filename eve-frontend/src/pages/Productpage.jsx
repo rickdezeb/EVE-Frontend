@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload, faPlus, faTrash, faSortAlphaAsc, faSortNumericAsc, faSortNumericDesc, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
+
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useGetProducts, useAddProduct, useDeleteProduct } from '../hooks/ProductHooks';
 import { useDownloadFile, useRenameFile } from '../hooks/FileHooks';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
+import Pagination from '../components/Pagination';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const Property = ({ product, file }) => {
+const Property = ({ product, file, currentPage }) => {
   const navigate = useNavigate();
   const loadEditPage = () => {
-    navigate("/editpage", { state: { product, file } });
+    navigate("/editpage", { state: { product, file, currentPage } });
   };
 
   return (
@@ -55,23 +57,23 @@ export default function ProductPage() {
     setIsRenaming(true);
   };
 
-  const handleRename = async () => {
+const handleRename = async () => {
     if (renameFileName.trim() === "" || renameFileName === file.name) {
-      setIsRenaming(false);
-      return;
+        setIsRenaming(false);
+        return;
     }
     try {
-      await rename(file.id, renameFileName);
-      file.name = renameFileName; // Update the file name locally
-      localStorage.setItem(`fileName-${file.id}`, renameFileName); // Save to localStorage
-      setIsRenaming(false);
-      toast.success("File successfully renamed.", { theme: "colored" });
-      refreshItems(); // Refresh items to reflect the change
+        await rename(file.id, renameFileName); // Voer de hernoeming uit
+        file.name = renameFileName; // Update de bestandsnaam lokaal
+        localStorage.setItem(`fileName-${file.id}`, renameFileName); // Sla op in localStorage
+        setIsRenaming(false);
+        toast.success("File successfully renamed.", { theme: "colored" });
+        refreshItems(); // Ververs items om de wijziging weer te geven
     } catch (error) {
-      console.error(error);
-      toast.error("Failed to rename file.", { theme: "colored" });
+        console.error(error);
+        toast.error("Failed to rename file.", { theme: "colored" });
     }
-  };
+};
 
   const handleRenameKeyDown = (e) => {
     if (e.key === 'Enter') {
@@ -148,40 +150,27 @@ export default function ProductPage() {
 
   const totalPages = Math.ceil(totalProducts / itemsPerPage);
 
-  const getPaginationNumbers = () => {
-    const paginationNumbers = [];
-    const maxVisible = 5;
-    const halfVisible = Math.floor(maxVisible / 2);
-
-    let startPage = Math.max(1, currentPage - halfVisible);
-    let endPage = Math.min(totalPages, currentPage + halfVisible);
-
-    if (startPage === 1) {
-      endPage = Math.min(totalPages, startPage + maxVisible - 1);
-    } else if (endPage === totalPages) {
-      startPage = Math.max(1, endPage - maxVisible + 1);
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+      setInputPage('');
     }
-
-    if (startPage > 1) {
-      paginationNumbers.push(1);
-      if (startPage > 2) {
-        paginationNumbers.push('...');
-      }
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      paginationNumbers.push(i);
-    }
-
-    if (endPage < totalPages) {
-      if (endPage < totalPages - 1) {
-        paginationNumbers.push('...');
-      }
-      paginationNumbers.push(totalPages);
-    }
-
-    return paginationNumbers;
   };
+
+  const handleInputPageChange = (event) => {
+    setInputPage(event.target.value);
+  };
+
+  const handleGoToPage = () => {
+    const pageNumber = parseInt(inputPage, 10);
+    if (!isNaN(pageNumber)) {
+      handlePageChange(pageNumber);
+    }
+  };
+
+  if (isLoadingProducts) {
+    return <div className="text-center">Loading products...<span className="spinner-border spinner-border-sm ms-2"></span></div>;
+  }
 
   return (
     <main className="container mt-4">
@@ -235,10 +224,10 @@ export default function ProductPage() {
               </tr>
             </thead>
             <tbody className="table-group-divider">
-              {products.length > 0 ? products.map((product) => (
+              {products.length > 0 ? products.map((product, index) => (
                 <tr key={product.id}>
                   <td><input type="checkbox" className="me-2" checked={selectedProducts.includes(product.id)} onChange={() => handleSelectProduct(product.id)} /> </td>
-                  <td><Property product={product} file={file} /></td>
+                  <td><Property product={product} file={file} currentPage={currentPage} /></td>
                   <td>{new Date(product.lastUpdated).toLocaleString()}</td>
                 </tr>
               )) : (
@@ -248,55 +237,15 @@ export default function ProductPage() {
             </tbody>
           </table>
 
-          <div className="d-flex justify-content-center align-items-center mt-3">
-            {isLoadingProducts ? (
-              <div className="text-center">Loading pagination...<span className="spinner-border spinner-border-sm ms-2"></span></div>
-            ) : (
-              <>
-                <div className="me-3">
-                  <div>Total {totalProducts} products </div>
-                </div>
-                <nav>
-                  <ul className="pagination mb-0">
-                    <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                      <button className="page-link" onClick={() => handlePageChange(currentPage - 1)}>
-                        Previous
-                      </button>
-                    </li>
-                    {getPaginationNumbers().map((pageNumber, index) => (
-                      <li className={`page-item ${currentPage === pageNumber ? 'active' : ''}`} key={index}>
-                        {pageNumber === '...' ? (
-                          <span className="page-link">...</span>
-                        ) : (
-                          <button className="page-link" 
-                          style={{ minWidth: '45px', textAlign: 'center', margin: '0 2px' }}
-                          onClick={() => handlePageChange(pageNumber)}>
-                            {pageNumber}
-                          </button>
-                        )}
-                      </li>
-                    ))}
-                    <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                      <button className="page-link" onClick={() => handlePageChange(currentPage + 1)}>
-                        Next
-                      </button>
-                    </li>
-                  </ul>
-                </nav>
-                <div className="d-flex align-items-center ms-3">
-                  <span className="me-2">Go to:</span>
-                  <input
-                    type="number"
-                    className="form-control me-2 w-25"
-                    value={inputPage}
-                    onChange={handleInputPageChange}
-                    placeholder="Page"
-                  />
-                  <button className="btn btn-primary me-2" onClick={handleGoToPage} disabled={!inputPage}>Go</button>
-                </div>
-              </>
-            )}
-          </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            handlePageChange={handlePageChange}
+            inputPage={inputPage}
+            handleInputPageChange={handleInputPageChange}
+            handleGoToPage={handleGoToPage}
+            showSaveButton={false}
+          />
         </div>
       </div>
 

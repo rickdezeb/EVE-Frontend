@@ -1,52 +1,48 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUpload } from '@fortawesome/free-solid-svg-icons';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-export default function UploadExcelPopup({ uploadFile, isLoading }) {
+const UploadExcelPopup = ({ uploadFile, isLoading }) => {
   const [selectedFile, setSelectedFile] = useState(null);
-  const [selectedFileName, setSelectedFileName] = useState("");
+  const [selectedFileName, setSelectedFileName] = useState('');
+  const [show, setShow] = useState(false);
   const fileInputRef = useRef(null);
-  const modalRef = useRef(null);
 
-  useEffect(() => {
-    const modalElement = document.getElementById("excelImportPopUp");
-    modalRef.current = new window.bootstrap.Modal(modalElement);
-    return () => {
-      modalRef.current = null;
-    };
-  }, []);
-
-  const handleShow = () => {
-    setSelectedFile(null);
-    setSelectedFileName("");
-    modalRef.current.show();
-  };
-
+  const handleShow = () => setShow(true);
   const handleClose = () => {
-    modalRef.current.hide();
-  };
-
-  const handleFileSelect = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setSelectedFile(file);
-      setSelectedFileName(file.name);
-    }
+    setShow(false);
+    setSelectedFile(null);
+    setSelectedFileName('');
   };
 
   const triggerFileInput = () => {
     fileInputRef.current.click();
   };
 
-  const handleUploadFile = async () => {
+  const handleFileSelect = (event) => {
+    const file = event.target.files[0];
+    if (file && file.name.endsWith('.xlsx')) {
+      setSelectedFile(file);
+      setSelectedFileName(file.name);
+    } else {
+      toast.error('Please select a valid .xlsx file', { theme: 'colored' });
+      setSelectedFile(null);
+      setSelectedFileName('');
+    }
+    event.target.value = null;
+  };
+
+  const handleUpload = async () => {
     if (selectedFile) {
       const formData = new FormData();
-      formData.append("file", selectedFile);
+      formData.append('file', selectedFile);
+
       try {
         await uploadFile(formData);
         handleClose();
-      }
-      catch (error) {
+      } catch (error) {
         console.error("Error uploading file:", error);
       }
     }
@@ -59,26 +55,18 @@ export default function UploadExcelPopup({ uploadFile, isLoading }) {
       </button>
 
       <div
-        className="modal fade"
+        className={`modal fade ${show ? 'show' : ''}`}
         id="excelImportPopUp"
         tabIndex="-1"
         aria-labelledby="excelImportPopUpLabel"
-        aria-hidden="true"
+        aria-hidden={!show}
+        style={{ display: show ? 'block' : 'none' }}
       >
         <div className="modal-dialog">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title fs-4" id="excelImportPopUpLabel">
-                Import Excel Form
-              </h5>
-              <button
-                type="button"
-                className="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-                onClick={handleClose}
-                disabled={isLoading}
-              ></button>
+              <h5 className="modal-title fs-4" id="excelImportPopUpLabel">Upload Excel File</h5>
+              <button type="button" className="btn-close" onClick={handleClose} aria-label="Close"></button>
             </div>
             <div className="modal-body p-4">
               <h2 className="mb-3" style={{ fontWeight: "bold" }}>
@@ -102,22 +90,15 @@ export default function UploadExcelPopup({ uploadFile, isLoading }) {
                 </div>
               </div>
             </div>
-            <div className="modal-footer justify-content-between">
+            <div className="modal-footer">
+              <button type="button" className="btn btn-secondary" onClick={handleClose}>Close</button>
               <button
                 type="button"
-                className="btn btn-secondary flex-grow-1"
-                onClick={handleClose}
-                disabled={isLoading}
+                className="btn btn-primary"
+                onClick={handleUpload}
+                disabled={!selectedFile || isLoading}
               >
-                Close
-              </button>
-              <button type="button" className="btn btn-primary flex-grow-1" onClick={handleUploadFile} disabled={!selectedFile || isLoading}
-              >
-                {isLoading ? (
-                  <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                ) : (
-                  'Upload'
-                )}
+                {isLoading ? <span className="spinner-border spinner-border-sm"></span> : 'Upload'}
               </button>
             </div>
           </div>
@@ -125,5 +106,6 @@ export default function UploadExcelPopup({ uploadFile, isLoading }) {
       </div>
     </div>
   );
-}
+};
 
+export default UploadExcelPopup;
