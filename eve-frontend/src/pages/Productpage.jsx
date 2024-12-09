@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDownload, faPlus, faTrash, faSortAlphaAsc, faSortNumericAsc, faSortNumericDesc } from '@fortawesome/free-solid-svg-icons';
+import { faDownload, faPlus, faTrash, faSortAlphaAsc, faSortNumericAsc, faSortNumericDesc, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
+
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useGetProducts, useAddProduct, useDeleteProduct } from '../hooks/ProductHooks';
-import { useDownloadFile } from '../hooks/FileHooks';
+import { useDownloadFile, useRenameFile } from '../hooks/FileHooks';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 import Pagination from '../components/Pagination';
 import { toast } from 'react-toastify';
@@ -41,23 +42,47 @@ export default function ProductPage() {
   const { remove, isLoading: isLoadingDelete } = useDeleteProduct(refreshItems);
   const { add, isLoading: isLoadingAdd } = useAddProduct(refreshItems);
   const { download, isLoading: isLoadingDownload } = useDownloadFile();
+  const { rename, isLoading: isLoadingRename } = useRenameFile(refreshItems);
 
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [renameFileName, setRenameFileName] = useState(localStorage.getItem(`fileName-${file?.id}`) || file?.name);
+  const [isRenaming, setIsRenaming] = useState(false);
 
-  const handleDeleteProducts = async () => {
-    try {
-      await Promise.all(selectedProducts.map(productId => remove(productId)));
-      const updatedProducts = products.filter(product => !selectedProducts.includes(product.id));
+  useEffect(() => {
+    setRenameFileName(localStorage.getItem(`fileName-${file?.id}`) || file?.name);
+  }, [file]);
 
-      refreshItems(updatedProducts);
-      setSelectedProducts([]);
-      setShowDeleteModal(false);
-      toast.error("File deleted.", { theme: "colored" });
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to delete products.", { theme: "colored" });
+  const handleRenameClick = () => {
+    setIsRenaming(true);
+  };
+
+const handleRename = async () => {
+    if (renameFileName.trim() === "" || renameFileName === file.name) {
+        setIsRenaming(false);
+        return;
     }
+    try {
+        await rename(file.id, renameFileName); // Voer de hernoeming uit
+        file.name = renameFileName; // Update de bestandsnaam lokaal
+        localStorage.setItem(`fileName-${file.id}`, renameFileName); // Sla op in localStorage
+        setIsRenaming(false);
+        toast.success("File successfully renamed.", { theme: "colored" });
+        refreshItems(); // Ververs items om de wijziging weer te geven
+    } catch (error) {
+        console.error(error);
+        toast.error("Failed to rename file.", { theme: "colored" });
+    }
+};
+
+  const handleRenameKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleRename();
+    }
+  };
+
+  const handleRenameBlur = () => {
+    handleRename();
   };
 
   const handleAddProduct = async (e) => {
@@ -69,21 +94,28 @@ export default function ProductPage() {
     } catch (error) {
       console.error(error);
       toast.error("Failed to add product.", { theme: "colored" });
+    }
+  };
 
+  const handleDeleteProducts = async () => {
+    try {
+      await Promise.all(selectedProducts.map(productId => remove(productId)));
+      setSelectedProducts([]);
+      setShowDeleteModal(false);
+      refreshItems();
+      toast.success("Products deleted.", { theme: "colored" });
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to delete products.", { theme: "colored" });
     }
   };
 
   const handleSelectAllProducts = (e) => {
     if (e.target.checked) {
       setSelectedProducts(products.map(product => product.id));
-
     } else {
       setSelectedProducts([]);
     }
-  };
-
-  const handleDownloadClick = () => {
-    download(file.id, file.name);
   };
 
   const handleSelectProduct = (productId) => {
@@ -98,12 +130,22 @@ export default function ProductPage() {
     setIsDescending((prevIsDescending) => !prevIsDescending);
   };
 
-  const handleNextPage = () => {
-    setCurrentPage((prevPage) => prevPage + 1);
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+      setInputPage('');
+    }
   };
 
-  const handlePreviousPage = () => {
-    setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
+  const handleInputPageChange = (event) => {
+    setInputPage(event.target.value);
+  };
+
+  const handleGoToPage = () => {
+    const pageNumber = parseInt(inputPage, 10);
+    if (!isNaN(pageNumber)) {
+      handlePageChange(pageNumber);
+    }
   };
 
   const totalPages = Math.ceil(totalProducts / itemsPerPage);
@@ -135,9 +177,30 @@ export default function ProductPage() {
       <div className="card mb-3">
         <div className="card-body">
           <div className="d-flex justify-content-between align-items-center mb-4">
-            <h4>{file?.name}</h4>
+            <div className="d-flex align-items-center">
+              {isRenaming ? (
+                <input
+                  type="text"
+                  value={renameFileName}
+                  onChange={(e) => setRenameFileName(e.target.value)}
+                  onBlur={handleRenameBlur}
+                  onKeyDown={handleRenameKeyDown}
+                  autoFocus
+                  className="form-control me-2"
+                  style={{ maxWidth: '200px' }}
+                />
+              ) : (
+                <h4 className="me-2">{renameFileName}</h4>
+              )}
+              <FontAwesomeIcon
+                icon={faPencilAlt}
+                className="text-primary"
+                style={{ cursor: 'pointer' }}
+                onClick={handleRenameClick}
+              />
+            </div>
             <div className="d-flex">
-              <button className="btn btn-primary me-2" onClick={handleDownloadClick}>
+              <button className="btn btn-primary me-2" onClick={() => download(file.id, file.name)}>
                 {isLoadingDownload ? <span className="spinner-border spinner-border-sm"></span> : <FontAwesomeIcon icon={faDownload} className="text-white" />}
               </button>
               <button type="button" className="btn btn-primary me-2" onClick={handleAddProduct}>
@@ -166,7 +229,6 @@ export default function ProductPage() {
                   <td><input type="checkbox" className="me-2" checked={selectedProducts.includes(product.id)} onChange={() => handleSelectProduct(product.id)} /> </td>
                   <td><Property product={product} file={file} currentPage={currentPage} /></td>
                   <td>{new Date(product.lastUpdated).toLocaleString()}</td>
-
                 </tr>
               )) : (
                 <tr>
@@ -191,10 +253,7 @@ export default function ProductPage() {
         show={showDeleteModal}
         onHide={() => setShowDeleteModal(false)}
         onConfirm={handleDeleteProducts}
-        itemCount={selectedProducts.length}
-        itemType="products"
       />
     </main>
   );
 }
-
