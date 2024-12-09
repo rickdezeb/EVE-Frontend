@@ -17,9 +17,9 @@ const Property = ({ product, file, currentPage }) => {
 
   return (
     <div>
-      <span 
-        onClick={loadEditPage} 
-        className="text-primary" 
+      <span
+        onClick={loadEditPage}
+        className="text-primary"
         style={{ cursor: 'pointer' }}
       >
         {product.id}
@@ -49,12 +49,12 @@ export default function ProductPage() {
     try {
       await Promise.all(selectedProducts.map(productId => remove(productId)));
       const updatedProducts = products.filter(product => !selectedProducts.includes(product.id));
+
       refreshItems(updatedProducts);
       setSelectedProducts([]);
       setShowDeleteModal(false);
-      toast.error("Selected products deleted.", { theme: "colored" });
-    }
-    catch (error) {
+      toast.error("File deleted.", { theme: "colored" });
+    } catch (error) {
       console.error(error);
       toast.error("Failed to delete products.", { theme: "colored" });
     }
@@ -64,19 +64,20 @@ export default function ProductPage() {
     e.preventDefault();
     try {
       await add(file.id);
-      toast.success("Product added successfully.");
-    }
-    catch (error) {
+      refreshItems();
+      toast.success("Product added successfully.", { theme: "colored" });
+    } catch (error) {
       console.error(error);
-      toast.error("Failed to add product.");
+      toast.error("Failed to add product.", { theme: "colored" });
+
     }
   };
 
   const handleSelectAllProducts = (e) => {
     if (e.target.checked) {
       setSelectedProducts(products.map(product => product.id));
-    }
-    else {
+
+    } else {
       setSelectedProducts([]);
     }
   };
@@ -165,6 +166,7 @@ export default function ProductPage() {
                   <td><input type="checkbox" className="me-2" checked={selectedProducts.includes(product.id)} onChange={() => handleSelectProduct(product.id)} /> </td>
                   <td><Property product={product} file={file} currentPage={currentPage} /></td>
                   <td>{new Date(product.lastUpdated).toLocaleString()}</td>
+
                 </tr>
               )) : (
                 <tr>
@@ -189,7 +191,10 @@ export default function ProductPage() {
         show={showDeleteModal}
         onHide={() => setShowDeleteModal(false)}
         onConfirm={handleDeleteProducts}
+        itemCount={selectedProducts.length}
+        itemType="products"
       />
     </main>
   );
 }
+
