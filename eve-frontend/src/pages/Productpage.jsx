@@ -130,24 +130,6 @@ const handleRename = async () => {
     setIsDescending((prevIsDescending) => !prevIsDescending);
   };
 
-  const handlePageChange = (page) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-      setInputPage('');
-    }
-  };
-
-  const handleInputPageChange = (event) => {
-    setInputPage(event.target.value);
-  };
-
-  const handleGoToPage = () => {
-    const pageNumber = parseInt(inputPage, 10);
-    if (!isNaN(pageNumber)) {
-      handlePageChange(pageNumber);
-    }
-  };
-
   const totalPages = Math.ceil(totalProducts / itemsPerPage);
 
   const handlePageChange = (page) => {
