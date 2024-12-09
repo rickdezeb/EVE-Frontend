@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-<<<<<<< Updated upstream
-import { faDownload, faPlus, faTrash, faSortAlphaAsc, faSortNumericAsc, faSortNumericDesc } from '@fortawesome/free-solid-svg-icons';
-=======
 import { faDownload, faPlus, faTrash, faSortAlphaAsc, faSortNumericAsc, faSortNumericDesc, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
->>>>>>> Stashed changes
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useGetProducts, useAddProduct, useDeleteProduct } from '../hooks/ProductHooks';
 import { useDownloadFile, useRenameFile } from '../hooks/FileHooks';
@@ -76,9 +72,6 @@ export default function ProductPage() {
       toast.error("Failed to rename file.", { theme: "colored" });
     }
   };
-<<<<<<< Updated upstream
-  
-=======
 
   const handleRenameKeyDown = (e) => {
     if (e.key === 'Enter') {
@@ -90,7 +83,6 @@ export default function ProductPage() {
     handleRename();
   };
 
->>>>>>> Stashed changes
   const handleAddProduct = async (e) => {
     e.preventDefault();
     try {
@@ -100,8 +92,6 @@ export default function ProductPage() {
     } catch (error) {
       console.error(error);
       toast.error("Failed to add product.", { theme: "colored" });
-<<<<<<< Updated upstream
-=======
     }
   };
 
@@ -115,7 +105,6 @@ export default function ProductPage() {
     } catch (error) {
       console.error(error);
       toast.error("Failed to delete products.", { theme: "colored" });
->>>>>>> Stashed changes
     }
   };
 
@@ -194,31 +183,6 @@ export default function ProductPage() {
     return paginationNumbers;
   };
 
-<<<<<<< Updated upstream
-  const handlePageChange = (page) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-      setInputPage('');
-    }
-  };
-
-  const handleInputPageChange = (event) => {
-    setInputPage(event.target.value);
-  };
-
-  const handleGoToPage = () => {
-    const pageNumber = parseInt(inputPage, 10);
-    if (!isNaN(pageNumber)) {
-      handlePageChange(pageNumber);
-    }
-  };
-
-  if (isLoadingProducts) {
-    return <div className="text-center">Loading products...<span className="spinner-border spinner-border-sm ms-2"></span></div>;
-  }
-
-=======
->>>>>>> Stashed changes
   return (
     <main className="container mt-4">
       <div className="card mb-3">
@@ -275,11 +239,7 @@ export default function ProductPage() {
                 <tr key={product.id}>
                   <td><input type="checkbox" className="me-2" checked={selectedProducts.includes(product.id)} onChange={() => handleSelectProduct(product.id)} /> </td>
                   <td><Property product={product} file={file} /></td>
-<<<<<<< Updated upstream
-                  <td>{new Date(product.lastUpdated).toLocaleDateString()}</td>
-=======
                   <td>{new Date(product.lastUpdated).toLocaleString()}</td>
->>>>>>> Stashed changes
                 </tr>
               )) : (
                 <tr>
@@ -308,13 +268,9 @@ export default function ProductPage() {
                         {pageNumber === '...' ? (
                           <span className="page-link">...</span>
                         ) : (
-<<<<<<< Updated upstream
-                          <button className="page-link" onClick={() => handlePageChange(pageNumber)}>
-=======
                           <button className="page-link" 
                           style={{ minWidth: '45px', textAlign: 'center', margin: '0 2px' }}
                           onClick={() => handlePageChange(pageNumber)}>
->>>>>>> Stashed changes
                             {pageNumber}
                           </button>
                         )}
@@ -327,8 +283,6 @@ export default function ProductPage() {
                     </li>
                   </ul>
                 </nav>
-<<<<<<< Updated upstream
-=======
                 <div className="d-flex align-items-center ms-3">
                   <span className="me-2">Go to:</span>
                   <input
@@ -340,7 +294,6 @@ export default function ProductPage() {
                   />
                   <button className="btn btn-primary me-2" onClick={handleGoToPage} disabled={!inputPage}>Go</button>
                 </div>
->>>>>>> Stashed changes
               </>
             )}
           </div>
@@ -354,8 +307,4 @@ export default function ProductPage() {
       />
     </main>
   );
-<<<<<<< Updated upstream
 }
-=======
-}
->>>>>>> Stashed changes
