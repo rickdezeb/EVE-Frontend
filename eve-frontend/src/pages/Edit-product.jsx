@@ -102,14 +102,10 @@ function Editpage() {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
       setInputPage('');
-<<<<<<< Updated upstream
-      setSelectedProductId(products[0]?.id);
-=======
 
       if (products.length > 0) {
         setSelectedProductId(products[0]?.id);
       }
->>>>>>> Stashed changes
     }
   };
 
@@ -168,14 +164,6 @@ function Editpage() {
                         Previous
                       </button>
                     </li>
-<<<<<<< Updated upstream
-                      {getPaginationNumbers().map((pageNumber) => (
-                    <li className={`page-item ${currentPage === pageNumber ? 'active' : ''}`} key={pageNumber}>
-                      <button
-                        className="page-link"
-                        style={{ minWidth: '45px', textAlign: 'center', margin: '0 2px' }}
-                        onClick={() => handlePageChange(pageNumber)}
-=======
 
                     {getPaginationNumbers().map((pageNumber) => (
                       <li className={`page-item ${currentPage === pageNumber ? 'active' : ''}`} key={pageNumber}>
@@ -183,7 +171,6 @@ function Editpage() {
                           className="page-link"
                           style={{ minWidth: '45px', textAlign: 'center', margin: '0 2px' }}
                           onClick={() => handlePageChange(pageNumber)}
->>>>>>> Stashed changes
                         >
                           {pageNumber}
                         </button>

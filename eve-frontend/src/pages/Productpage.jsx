@@ -1,10 +1,6 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-<<<<<<< Updated upstream
-import { faDownload, faPlus, faTrash, faSortAlphaAsc, faSortAlphaDesc, faSortNumericAsc, faSortNumericDesc } from '@fortawesome/free-solid-svg-icons';
-=======
 import { faDownload, faPlus, faTrash, faSortAlphaAsc, faSortNumericAsc, faSortNumericDesc } from '@fortawesome/free-solid-svg-icons';
->>>>>>> Stashed changes
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useGetProducts, useAddProduct, useDeleteProduct } from '../hooks/ProductHooks';
 import { useDownloadFile } from '../hooks/FileHooks';
@@ -18,11 +14,7 @@ const Property = ({ product, file, currentPage }) => {
   const loadEditPage = () => {
     navigate("/editpage", { state: { product, file, currentPage } });
   };
-<<<<<<< Updated upstream
-  
-=======
 
->>>>>>> Stashed changes
   return (
     <div>
       <span 
@@ -56,12 +48,8 @@ export default function ProductPage() {
   const handleDeleteProducts = async () => {
     try {
       await Promise.all(selectedProducts.map(productId => remove(productId)));
-<<<<<<< Updated upstream
-=======
       const updatedProducts = products.filter(product => !selectedProducts.includes(product.id));
       refreshItems(updatedProducts);
-
->>>>>>> Stashed changes
       setSelectedProducts([]);
       setShowDeleteModal(false);
       toast.error("Selected products deleted.", { theme: "colored" });
@@ -164,11 +152,7 @@ export default function ProductPage() {
             <thead>
               <tr>
                 <th scope="col"><input type="checkbox" className="me-2" onChange={handleSelectAllProducts} checked={selectedProducts.length === products.length && products.length > 0} /></th>
-<<<<<<< Updated upstream
-                <th scope="col">Product Identifier <FontAwesomeIcon icon={faSortAlphaAsc} hidden/></th>
-=======
                 <th scope="col">Product Identifier</th>
->>>>>>> Stashed changes
                 <th scope="col" onClick={handleSortClick} style={{ cursor: 'pointer' }}>
                   Last Updated <FontAwesomeIcon icon={isDescending ? faSortNumericDesc : faSortNumericAsc} />
                 </th>
@@ -189,57 +173,6 @@ export default function ProductPage() {
             </tbody>
           </table>
 
-<<<<<<< Updated upstream
-          <div className="d-flex justify-content-center align-items-center mt-3">
-            {isLoadingProducts ? (
-              <div className="text-center">Loading pagination...<span className="spinner-border spinner-border-sm ms-2"></span></div>
-            ) : (
-              <>
-                <div className="me-3">
-                  <div>Total {totalProducts} products </div>
-                </div>
-                <nav>
-                  <ul className="pagination mb-0">
-                    <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                      <button className="page-link" onClick={() => handlePageChange(currentPage - 1)}>
-                        Previous
-                      </button>
-                    </li>
-                    {getPaginationNumbers().map((pageNumber, index) => (
-                      <li className={`page-item ${currentPage === pageNumber ? 'active' : ''}`} key={index}>
-                        {pageNumber === '...' ? (
-                          <span className="page-link">...</span>
-                        ) : (
-                          <button className="page-link" 
-                          style={{ minWidth: '45px', textAlign: 'center', margin: '0 2px' }}
-                          onClick={() => handlePageChange(pageNumber)}>
-                            {pageNumber}
-                          </button>
-                        )}
-                      </li>
-                    ))}
-                    <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                      <button className="page-link" onClick={() => handlePageChange(currentPage + 1)}>
-                        Next
-                      </button>
-                    </li>
-                  </ul>
-                </nav>
-                <div className="d-flex align-items-center ms-3">
-                  <span className="me-2">Go to:</span>
-                  <input
-                    type="number"
-                    className="form-control me-2 w-25"
-                    value={inputPage}
-                    onChange={handleInputPageChange}
-                    placeholder="Page"
-                  />
-                  <button className="btn btn-primary me-2" onClick={handleGoToPage} disabled={!inputPage}>Go</button>
-                </div>
-              </>
-            )}
-          </div>
-=======
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
@@ -249,17 +182,12 @@ export default function ProductPage() {
             handleGoToPage={handleGoToPage}
             showSaveButton={false}
           />
->>>>>>> Stashed changes
         </div>
       </div>
 
       <DeleteConfirmationModal
         show={showDeleteModal}
-<<<<<<< Updated upstream
-        onClose={() => setShowDeleteModal(false)}
-=======
         onHide={() => setShowDeleteModal(false)}
->>>>>>> Stashed changes
         onConfirm={handleDeleteProducts}
       />
     </main>
