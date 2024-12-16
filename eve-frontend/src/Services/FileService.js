@@ -11,6 +11,12 @@ export const getFiles = async (page = 0, pageSize = 15, sortByDate = false, isDe
   return data;
 };
 
+export const changeObjectIdentifier = (fileId, newIdentifier) => {
+  const endpoint = `/ChangeIdentifier?id=${fileId}&objectIdentifier=${newIdentifier}`;
+  return api.put(controller, null, endpoint);
+};
+
+
 export const getFileCount = async () => {
   const endpoint = `/Count`;
   const response = await api.get(controller, endpoint);

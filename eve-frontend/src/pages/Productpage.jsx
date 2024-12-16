@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDownload, faPlus, faTrash, faSortAlphaAsc, faSortNumericAsc, faSortNumericDesc, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
+import { faDownload, faPlus, faTrash, faSortAlphaAsc, faSortNumericAsc, faSortNumericDesc, faPencilAlt, faList } from '@fortawesome/free-solid-svg-icons';
 
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useGetProducts, useAddProduct, useDeleteProduct } from '../hooks/ProductHooks';
-import { useDownloadFile, useRenameFile } from '../hooks/FileHooks';
+import { useDownloadFile, useRenameFile, useChangeObjectIdentifier } from '../hooks/FileHooks';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 import Pagination from '../components/Pagination';
 import { toast } from 'react-toastify';
@@ -23,7 +23,7 @@ const Property = ({ product, file, currentPage }) => {
         className="text-primary"
         style={{ cursor: 'pointer' }}
       >
-        {product.id}
+        {product.identifier}
       </span>
     </div>
   );
@@ -31,14 +31,16 @@ const Property = ({ product, file, currentPage }) => {
 
 export default function ProductPage() {
   const location = useLocation();
-  const data = location.state || {};
-  const { file } = data;
-
+  const { file } = location.state || {};
   const [isDescending, setIsDescending] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [inputPage, setInputPage] = useState('');
   const itemsPerPage = 15;
-  const { products, totalProducts, isLoading: isLoadingProducts, refreshItems, searchProducts } = useGetProducts(file?.id, currentPage - 1, itemsPerPage, isDescending);
+  const { products, totalProducts, isLoading: isLoadingProducts, refreshItems, objectIdentifier } = useGetProducts(file?.id, currentPage - 1, itemsPerPage, isDescending);
+  const [selectedIdentifier, setSelectedIdentifier] = useState(objectIdentifier);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const { changeIdentifier, isLoading } = useChangeObjectIdentifier(() => {});
+
   const { remove, isLoading: isLoadingDelete } = useDeleteProduct(refreshItems);
   const { add, isLoading: isLoadingAdd } = useAddProduct(refreshItems);
   const { download, isLoading: isLoadingDownload } = useDownloadFile();
@@ -57,18 +59,37 @@ export default function ProductPage() {
     setIsRenaming(true);
   };
 
+  const toggleDropdown = () => {
+    setDropdownOpen(!dropdownOpen);
+  };
+
+  const handleIdentifierChange = async (newIdentifier) => {
+    try {
+      await changeIdentifier(file.id, newIdentifier);
+      refreshItems();
+      toast.success("Object identifier successfully changed.", { theme: "colored" });
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to change object identifier.", { theme: "colored" });
+    } finally {
+      setDropdownOpen(false);
+    }
+  };
+
+
+
 const handleRename = async () => {
     if (renameFileName.trim() === "" || renameFileName === file.name) {
         setIsRenaming(false);
         return;
     }
     try {
-        await rename(file.id, renameFileName); // Voer de hernoeming uit
-        file.name = renameFileName; // Update de bestandsnaam lokaal
-        localStorage.setItem(`fileName-${file.id}`, renameFileName); // Sla op in localStorage
+        await rename(file.id, renameFileName);
+        file.name = renameFileName;
+        localStorage.setItem(`fileName-${file.id}`, renameFileName);
         setIsRenaming(false);
         toast.success("File successfully renamed.", { theme: "colored" });
-        refreshItems(); // Ververs items om de wijziging weer te geven
+        refreshItems();
     } catch (error) {
         console.error(error);
         toast.error("Failed to rename file.", { theme: "colored" });
@@ -195,16 +216,29 @@ const handleRename = async () => {
           </div>
 
           <table className="table table-auto table-hover align-middle">
-            <thead>
-              <tr>
-                <th scope="col"><input type="checkbox" className="me-2" onChange={handleSelectAllProducts} checked={selectedProducts.length === products.length && products.length > 0} /></th>
-                <th scope="col">Product Identifier</th>
-                <th scope="col" onClick={handleSortClick} style={{ cursor: 'pointer' }}>
-                  Last Updated <FontAwesomeIcon icon={isDescending ? faSortNumericDesc : faSortNumericAsc} />
-                </th>
-                <th scope="col"></th>
-              </tr>
-            </thead>
+          <thead>
+          <tr>
+            <th scope="col"><input type="checkbox" className="me-2" onChange={handleSelectAllProducts} checked={selectedProducts.length === products.length && products.length > 0} /></th>
+            <th scope="col" style={{ cursor: 'pointer' }} onClick={toggleDropdown}>
+              <strong>{objectIdentifier}</strong> <FontAwesomeIcon icon={faList} />
+              {dropdownOpen && (
+                <ul className="dropdown-menu show">
+                  {file.headers.map((header, index) => (
+                    <li key={index}>
+                      <button className="dropdown-item" onClick={() => handleIdentifierChange(header)}>
+                        {header}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </th>
+            <th scope="col" onClick={handleSortClick} style={{ cursor: 'pointer' }}>
+              <strong>Last Updated</strong> <FontAwesomeIcon icon={isDescending ? faSortNumericDesc : faSortNumericAsc} />
+            </th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
             <tbody className="table-group-divider">
               {products.length > 0 ? products.map((product, index) => (
                 <tr key={product.id}>
