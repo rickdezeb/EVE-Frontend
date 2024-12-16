@@ -36,6 +36,24 @@ export const useGetFiles = (page = 0, pageSize = 15, sortByDate = false, isDesce
     return { files, totalFiles, isLoading, refreshItems };
 };
 
+export const useChangeObjectIdentifier = (refreshItems) => {
+    const [isLoading, setIsLoading] = useState(false);
+  
+    const changeIdentifier = async (fileId, newIdentifier) => {
+      try {
+        setIsLoading(true);
+        await fileService.changeObjectIdentifier(fileId, newIdentifier);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+        refreshItems();
+      }
+    };
+  
+    return { changeIdentifier, isLoading };
+  };
+
 
 export const useRenameFile = (refreshItems) => {
     const [isLoading, setIsLoading] = useState(false);
