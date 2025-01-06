@@ -303,6 +303,7 @@ export default function Dashboard() {
                 </tbody>
               </table>
             )}
+                      <p className="text-end mt-2"><strong>Max items: {itemsPerPage}</strong></p>
           </div>
           <Pagination
             currentPage={currentPage}
