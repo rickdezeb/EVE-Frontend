@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload, faPlus, faTrash, faSortAlphaAsc, faSortNumericAsc, faSortNumericDesc, faPencilAlt, faList } from '@fortawesome/free-solid-svg-icons';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -38,6 +38,7 @@ export default function ProductPage() {
   const { products, totalProducts, isLoading: isLoadingProducts, refreshItems, objectIdentifier } = useGetProducts(file?.id, currentPage - 1, itemsPerPage, isDescending);
   const [selectedIdentifier, setSelectedIdentifier] = useState(objectIdentifier);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null); // Ref for the dropdown
   const { changeIdentifier, isLoading } = useChangeObjectIdentifier(() => {});
 
   const { remove, isLoading: isLoadingDelete } = useDeleteProduct(refreshItems);
@@ -53,7 +54,19 @@ export default function ProductPage() {
   useEffect(() => {
     setRenameFileName(localStorage.getItem(`fileName-${file?.id}`) || file?.name);
   }, [file]);
-  
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const handleRenameClick = () => {
     setIsRenaming(true);
@@ -218,16 +231,16 @@ export default function ProductPage() {
                 <th scope="col" style={{ cursor: 'pointer' }} onClick={toggleDropdown}>
                   <strong>{objectIdentifier}</strong> <FontAwesomeIcon icon={faList} />
                   {dropdownOpen && (
-                    <ul className="dropdown-menu show">
+                    <ul ref={dropdownRef} className="dropdown-menu show overflow-auto" style={{ maxHeight: '200px' }}>
                       {file.headers.map((header, index) => (
                         <li key={index}>
                           <button className="dropdown-item" onClick={() => handleIdentifierChange(header)}>
-                            {header}
+                          {header}
                           </button>
                         </li>
                       ))}
                     </ul>
-                  )}
+                    )}
                 </th>
                 <th scope="col" onClick={handleSortClick} style={{ cursor: 'pointer' }}>
                   <strong>Last Updated</strong> <FontAwesomeIcon icon={isDescending ? faSortNumericDesc : faSortNumericAsc} />
