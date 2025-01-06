@@ -54,6 +54,7 @@ export default function ProductPage() {
   useEffect(() => {
     setRenameFileName(localStorage.getItem(`fileName-${file?.id}`) || file?.name);
   }, [file]);
+  
 
   const handleRenameClick = () => {
     setIsRenaming(true);
@@ -252,6 +253,7 @@ const handleRename = async () => {
                 </tr>)}
             </tbody>
           </table>
+          <p className="text-end mt-2"><strong>Max items: {itemsPerPage}</strong></p>
 
           <Pagination
             currentPage={currentPage}
