@@ -8,14 +8,14 @@ export const useGetProducts = (fileId, page = 0, pageSize = 15, isDescending = f
     const [isLoading, setIsLoading] = useState(false);
     const [refresh, setRefresh] = useState(false);
     const [objectIdentifier, setObjectIdentifier] = useState('');
-    
 
     const retrieve = async () => {
         try {
             setIsLoading(true);
             const data = await productService.getProducts(fileId, page, pageSize, isDescending);
+            const count = await productService.getProductCount(fileId);
             setProducts(data.objects);
-            setTotalProducts(data.objects.length);
+            setTotalProducts(count);
             setObjectIdentifier(data.objectIdentifier);
         } catch (error) {
             console.error(error);

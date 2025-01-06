@@ -58,46 +58,7 @@ function Editpage() {
     }
   };
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = products.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(totalProducts / itemsPerPage);
-
-  const getPaginationNumbers = () => {
-    const paginationNumbers = [];
-    const maxVisible = 5;
-
-    const halfVisible = Math.floor(maxVisible / 2);
-
-    let startPage = Math.max(1, currentPage - halfVisible);
-    let endPage = Math.min(totalPages, currentPage + halfVisible);
-
-    if (startPage === 1) {
-      endPage = Math.min(totalPages, startPage + maxVisible - 1);
-    } else if (endPage === totalPages) {
-      startPage = Math.max(1, endPage - maxVisible + 1);
-    }
-
-    if (startPage > 1) {
-      paginationNumbers.push(1);
-      if (startPage > 2) {
-        paginationNumbers.push('...');
-      }
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      paginationNumbers.push(i);
-    }
-
-    if (endPage < totalPages) {
-      if (endPage < totalPages - 1) {
-        paginationNumbers.push('...');
-      }
-      paginationNumbers.push(totalPages);
-    }
-
-    return paginationNumbers;
-  };
 
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) {
@@ -119,6 +80,49 @@ function Editpage() {
     if (!isNaN(pageNumber)) {
       handlePageChange(pageNumber);
     }
+  };
+
+  const renderPagination = () => {
+    const pages = [];
+    const maxPagesToShow = 5;
+    const startPage = Math.max(2, currentPage - Math.floor(maxPagesToShow / 2));
+    const endPage = Math.min(totalPages - 1, currentPage + Math.floor(maxPagesToShow / 2));
+
+    if (startPage > 2) {
+      pages.push(<li key="start-ellipsis" className="page-item disabled"><span className="page-link">...</span></li>);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
+        <li key={i} className={`page-item ${currentPage === i ? 'active' : ''}`}>
+          <button className="page-link" onClick={() => handlePageChange(i)}>{i}</button>
+        </li>
+      );
+    }
+
+    if (endPage < totalPages - 1) {
+      pages.push(<li key="end-ellipsis" className="page-item disabled"><span className="page-link">...</span></li>);
+    }
+
+    return (
+      <ul className="pagination mb-0">
+        <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+          <button className="page-link" onClick={() => handlePageChange(currentPage - 1)}>Previous</button>
+        </li>
+        <li className={`page-item ${currentPage === 1 ? 'active' : ''}`}>
+          <button className="page-link" onClick={() => handlePageChange(1)}>1</button>
+        </li>
+        {pages}
+        {totalPages > 1 && (
+          <li className={`page-item ${currentPage === totalPages ? 'active' : ''}`}>
+            <button className="page-link" onClick={() => handlePageChange(totalPages)}>{totalPages}</button>
+          </li>
+        )}
+        <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+          <button className="page-link" onClick={() => handlePageChange(currentPage + 1)}>Next</button>
+        </li>
+      </ul>
+    );
   };
 
   return (
@@ -159,30 +163,7 @@ function Editpage() {
                   <div>Total {totalProducts} products </div>
                 </div>
                 <nav>
-                  <ul className="pagination mb-0">
-                    <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                      <button className="page-link" onClick={() => handlePageChange(currentPage - 1)}>
-                        Previous
-                      </button>
-                    </li>
-
-                    {getPaginationNumbers().map((pageNumber) => (
-                      <li className={`page-item ${currentPage === pageNumber ? 'active' : ''}`} key={pageNumber}>
-                        <button
-                          className="page-link"
-                          style={{ minWidth: '45px', textAlign: 'center', margin: '0 2px' }}
-                          onClick={() => handlePageChange(pageNumber)}
-                        >
-                          {pageNumber}
-                        </button>
-                      </li>
-                    ))}
-                    <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                      <button className="page-link" onClick={() => handlePageChange(currentPage + 1)}>
-                        Next
-                      </button>
-                    </li>
-                  </ul>
+                  {renderPagination()}
                 </nav>
                 <div className="d-flex align-items-center ms-3">
                   <span className="me-2">Go to:</span>
