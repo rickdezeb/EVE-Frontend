@@ -63,7 +63,7 @@ export default function Dashboard() {
       await Promise.all(selectedFiles.map(fileId => remove(fileId)));
       setSelectedFiles([]);
       setShowDeleteModal(false);
-      toast.error("Selected files deleted.", { theme: "colored" });
+      toast.error("Selected file(s) deleted.", { theme: "colored" });
     } catch (error) {
       console.error(error);
       toast.error("Failed to delete files.", { theme: "colored" });

@@ -68,10 +68,8 @@ export default function ProductPage() {
     try {
       await changeIdentifier(file.id, newIdentifier);
       refreshItems();
-      toast.success("Object identifier successfully changed.", { theme: "colored" });
     } catch (error) {
       console.error(error);
-      toast.error("Failed to change object identifier.", { theme: "colored" });
     } finally {
       setDropdownOpen(false);
     }
@@ -125,7 +123,7 @@ const handleRename = async () => {
       setSelectedProducts([]);
       setShowDeleteModal(false);
       refreshItems();
-      toast.success("Products deleted.", { theme: "colored" });
+      toast.error("Product(s) deleted.", { theme: "colored" });
     } catch (error) {
       console.error(error);
       toast.error("Failed to delete products.", { theme: "colored" });
