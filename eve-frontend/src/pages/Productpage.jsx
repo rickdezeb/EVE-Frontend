@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload, faPlus, faTrash, faSortAlphaAsc, faSortNumericAsc, faSortNumericDesc, faPencilAlt, faList } from '@fortawesome/free-solid-svg-icons';
-
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useGetProducts, useAddProduct, useDeleteProduct } from '../hooks/ProductHooks';
 import { useDownloadFile, useRenameFile, useChangeObjectIdentifier } from '../hooks/FileHooks';
@@ -23,7 +22,7 @@ const Property = ({ product, file, currentPage }) => {
         className="text-primary"
         style={{ cursor: 'pointer' }}
       >
-        {product.identifier}
+        {product.identifier || "No identifier"}
       </span>
     </div>
   );
@@ -76,25 +75,23 @@ export default function ProductPage() {
     }
   };
 
-
-
-const handleRename = async () => {
+  const handleRename = async () => {
     if (renameFileName.trim() === "" || renameFileName === file.name) {
-        setIsRenaming(false);
-        return;
+      setIsRenaming(false);
+      return;
     }
     try {
-        await rename(file.id, renameFileName);
-        file.name = renameFileName;
-        localStorage.setItem(`fileName-${file.id}`, renameFileName);
-        setIsRenaming(false);
-        toast.success("File successfully renamed.", { theme: "colored" });
-        refreshItems();
+      await rename(file.id, renameFileName);
+      file.name = renameFileName;
+      localStorage.setItem(`fileName-${file.id}`, renameFileName);
+      setIsRenaming(false);
+      toast.success("File successfully renamed.", { theme: "colored" });
+      refreshItems();
     } catch (error) {
-        console.error(error);
-        toast.error("Failed to rename file.", { theme: "colored" });
+      console.error(error);
+      toast.error("Failed to rename file.", { theme: "colored" });
     }
-};
+  };
 
   const handleRenameKeyDown = (e) => {
     if (e.key === 'Enter') {
@@ -216,29 +213,29 @@ const handleRename = async () => {
           </div>
 
           <table className="table table-auto table-hover align-middle">
-          <thead>
-          <tr>
-            <th scope="col"><input type="checkbox" className="me-2" onChange={handleSelectAllProducts} checked={selectedProducts.length === products.length && products.length > 0} /></th>
-            <th scope="col" style={{ cursor: 'pointer' }} onClick={toggleDropdown}>
-              <strong>{objectIdentifier}</strong> <FontAwesomeIcon icon={faList} />
-              {dropdownOpen && (
-                <ul className="dropdown-menu show">
-                  {file.headers.map((header, index) => (
-                    <li key={index}>
-                      <button className="dropdown-item" onClick={() => handleIdentifierChange(header)}>
-                        {header}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </th>
-            <th scope="col" onClick={handleSortClick} style={{ cursor: 'pointer' }}>
-              <strong>Last Updated</strong> <FontAwesomeIcon icon={isDescending ? faSortNumericDesc : faSortNumericAsc} />
-            </th>
-            <th scope="col"></th>
-          </tr>
-        </thead>
+            <thead>
+              <tr>
+                <th scope="col"><input type="checkbox" className="me-2" onChange={handleSelectAllProducts} checked={selectedProducts.length === products.length && products.length > 0} /></th>
+                <th scope="col" style={{ cursor: 'pointer' }} onClick={toggleDropdown}>
+                  <strong>{objectIdentifier}</strong> <FontAwesomeIcon icon={faList} />
+                  {dropdownOpen && (
+                    <ul className="dropdown-menu show">
+                      {file.headers.map((header, index) => (
+                        <li key={index}>
+                          <button className="dropdown-item" onClick={() => handleIdentifierChange(header)}>
+                            {header}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </th>
+                <th scope="col" onClick={handleSortClick} style={{ cursor: 'pointer' }}>
+                  <strong>Last Updated</strong> <FontAwesomeIcon icon={isDescending ? faSortNumericDesc : faSortNumericAsc} />
+                </th>
+                <th scope="col"></th>
+              </tr>
+            </thead>
             <tbody className="table-group-divider">
               {products.length > 0 ? products.map((product, index) => (
                 <tr key={product.id}>
