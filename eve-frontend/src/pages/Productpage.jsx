@@ -9,10 +9,10 @@ import Pagination from '../components/Pagination';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const Property = ({ product, file, currentPage }) => {
+const Property = ({ product, file, indexation, currentProductPage, isDescending }) => {
   const navigate = useNavigate();
   const loadEditPage = () => {
-    navigate("/editpage", { state: { product, file, currentPage } });
+    navigate("/editpage", { state: { product, file, indexation, currentProductPage, isDescending } });
   };
 
   return (
@@ -257,7 +257,7 @@ export default function ProductPage() {
               {products.length > 0 ? products.map((product, index) => (
                 <tr key={product.id}>
                   <td><input type="checkbox" className="me-2" checked={selectedProducts.includes(product.id)} onChange={() => handleSelectProduct(product.id)} /> </td>
-                  <td><Property product={product} file={file} currentPage={currentPage} /></td>
+                  <td><Property product={product} file={file} currentProductPage={currentPage} indexation={index} isDescending={isDescending} /></td>
                   <td>{new Date(product.lastUpdated).toLocaleString()}</td>
                 </tr>
               )) : (

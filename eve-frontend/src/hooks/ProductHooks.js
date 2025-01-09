@@ -12,14 +12,21 @@ export const useGetProducts = (fileId, page = 0, pageSize = 15, isDescending = f
     const [refresh, setRefresh] = useState(false);
     const [objectIdentifier, setObjectIdentifier] = useState('');
 
+    const sleep = (ms) => {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    };
     const retrieve = async () => {
         try {
             setIsLoading(true);
+            console.log("Request done for" + page + "and pageszie" + pageSize);
             const data = await productService.getProducts(fileId, page, pageSize, isDescending);
             const count = await productService.getProductCount(fileId);
             setProducts(data.objects);
+            console.log("Products are", data.objects);
             setTotalProducts(count);
+            console.log("Total products are", count);
             setObjectIdentifier(data.objectIdentifier);
+            console.log("Object Identifier is", data.objectIdentifier);
         } catch (error) {
             console.error(error);
             toast.error("Failed to load products", { theme: "colored" });

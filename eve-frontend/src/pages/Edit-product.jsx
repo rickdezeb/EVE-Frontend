@@ -7,9 +7,15 @@ import { useGetProducts } from "../hooks/ProductHooks";
 function Editpage() {
   const location = useLocation();
   const data = location.state || {};
-  const { product, file } = data;
+  const { product, file, indexation, currentProductPage, isDescending } = data;
 
-  const [currentPage, setCurrentPage] = useState(1);
+  const initialPage = () => {
+    const fakeindex = currentProductPage - 1;
+    const realindex = fakeindex * 15;
+    const realerindex = indexation + realindex + 1;
+    return realerindex;
+  };
+  const [currentPage, setCurrentPage] = useState(initialPage);
   const [currentProduct, setCurrentProduct] = useState(product);
   const [inputPage, setInputPage] = useState('');
   const itemsPerPage = 1;
@@ -17,10 +23,10 @@ function Editpage() {
   const [selectedProductId, setSelectedProductId] = useState(product.id);
   const { properties, isLoading: isLoadingProperties, refreshItems } = useGetProperties(selectedProductId);
   const { update, isLoading: isLoadingUpdate } = useUpdateProperty(refreshItems);
-  const { products, totalProducts, isLoading: isLoadingProducts } = useGetProducts(file.id, currentPage - 1, itemsPerPage);
+  const { products, totalProducts, isLoading: isLoadingProducts} = useGetProducts(file.id, currentPage - 1, itemsPerPage, isDescending);
 
   const [localProperties, setLocalProperties] = useState(properties);
-
+  
   useEffect(() => {
     refreshItems();
   }, [selectedProductId]);
@@ -32,15 +38,19 @@ function Editpage() {
   }, [properties]);
 
   useEffect(() => {
+    if (products.length > 0) {
+      setSelectedProductId(products[0]?.id);
+    }
     const selectedProduct = products.find((p) => p.id === selectedProductId);
     if (selectedProduct) {
       setCurrentProduct(selectedProduct);
     }
-  }, [selectedProductId, products]);
+  }, [products]);
 
   const handleInputChange = (index, event) => {
     const newProperties = [...properties];
     newProperties[index].value = event.target.value;
+    console.log(newProperties);
     setLocalProperties(newProperties);
   };
 
@@ -64,10 +74,6 @@ function Editpage() {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
       setInputPage('');
-
-      if (products.length > 0) {
-        setSelectedProductId(products[0]?.id);
-      }
     }
   };
 
