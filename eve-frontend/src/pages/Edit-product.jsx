@@ -3,13 +3,14 @@ import { useLocation } from 'react-router-dom';
 import { useGetProperties, useUpdateProperty } from '../hooks/PropertyHooks';
 import { toast } from 'react-toastify';
 import { useGetProducts } from "../hooks/ProductHooks";
+import Pagination from '../components/Pagination';
 
 function Editpage() {
   const location = useLocation();
   const data = location.state || {};
-  const { product, file } = data;
+  const { product, file, indexation } = data;
 
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(indexation || 1);
   const [currentProduct, setCurrentProduct] = useState(product);
   const [inputPage, setInputPage] = useState('');
   const itemsPerPage = 1;
@@ -37,6 +38,12 @@ function Editpage() {
       setCurrentProduct(selectedProduct);
     }
   }, [selectedProductId, products]);
+
+  useEffect(() => {
+    if (products.length > 0) {
+    setSelectedProductId(products[0]?.id);
+    }
+  }, [products[0]?.id]);
 
   const handleInputChange = (index, event) => {
     const newProperties = [...properties];
@@ -82,49 +89,6 @@ function Editpage() {
     }
   };
 
-  const renderPagination = () => {
-    const pages = [];
-    const maxPagesToShow = 5;
-    const startPage = Math.max(2, currentPage - Math.floor(maxPagesToShow / 2));
-    const endPage = Math.min(totalPages - 1, currentPage + Math.floor(maxPagesToShow / 2));
-
-    if (startPage > 2) {
-      pages.push(<li key="start-ellipsis" className="page-item disabled"><span className="page-link">...</span></li>);
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(
-        <li key={i} className={`page-item ${currentPage === i ? 'active' : ''}`}>
-          <button className="page-link" onClick={() => handlePageChange(i)}>{i}</button>
-        </li>
-      );
-    }
-
-    if (endPage < totalPages - 1) {
-      pages.push(<li key="end-ellipsis" className="page-item disabled"><span className="page-link">...</span></li>);
-    }
-
-    return (
-      <ul className="pagination mb-0">
-        <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-          <button className="page-link" onClick={() => handlePageChange(currentPage - 1)}>Previous</button>
-        </li>
-        <li className={`page-item ${currentPage === 1 ? 'active' : ''}`}>
-          <button className="page-link" onClick={() => handlePageChange(1)}>1</button>
-        </li>
-        {pages}
-        {totalPages > 1 && (
-          <li className={`page-item ${currentPage === totalPages ? 'active' : ''}`}>
-            <button className="page-link" onClick={() => handlePageChange(totalPages)}>{totalPages}</button>
-          </li>
-        )}
-        <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-          <button className="page-link" onClick={() => handlePageChange(currentPage + 1)}>Next</button>
-        </li>
-      </ul>
-    );
-  };
-
   return (
     <div className="d-flex flex-column">
       <main className="container flex-fill">
@@ -163,21 +127,17 @@ function Editpage() {
                   <div>Total {totalProducts} products </div>
                 </div>
                 <nav>
-                  {renderPagination()}
-                </nav>
-                <div className="d-flex align-items-center ms-3">
-                  <span className="me-2">Go to:</span>
-                  <input
-                    type="number"
-                    className="form-control me-2 w-25"
-                    value={inputPage}
-                    onChange={handleInputPageChange}
-                    placeholder="Product"
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    handlePageChange={handlePageChange}
+                    inputPage={inputPage}
+                    handleInputPageChange={handleInputPageChange}
+                    handleGoToPage={handleGoToPage}
+                    showSaveButton={true}
+                    handleSave={handleSave}
                   />
-
-                  <button className="btn btn-primary me-2" onClick={handleGoToPage} disabled={!inputPage}>Go</button>
-                  <button className="btn btn-success" onClick={handleSave}>Save</button>
-                </div>
+                </nav>
               </>
             )}
           </div>
