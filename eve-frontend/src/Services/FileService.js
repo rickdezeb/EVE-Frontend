@@ -50,7 +50,14 @@ export const deleteFile = async (fileId) => {
   }
 };
 
-export const uploadFile = (formData) => api.post(controller, formData);
+export const uploadFile = async (formData) => {
+  const response = await api.post(controller, formData);
+  if (response.status === 200){
+    return { status: 200 };
+  } else {
+    throw new Error("Failed to upload file");
+  }
+};
 
 export const downloadFile = async (fileId) => {
   const endpoint = `/${fileId}/download`;
