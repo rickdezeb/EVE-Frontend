@@ -38,7 +38,7 @@ export default function ProductPage() {
   const { products, totalProducts, isLoading: isLoadingProducts, refreshItems, objectIdentifier } = useGetProducts(file?.id, currentPage - 1, itemsPerPage, isDescending);
   const [selectedIdentifier, setSelectedIdentifier] = useState(objectIdentifier);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null); // Ref for the dropdown
+  const dropdownRef = useRef(null);
   const { changeIdentifier, isLoading } = useChangeObjectIdentifier(() => {});
 
   const { remove, isLoading: isLoadingDelete } = useDeleteProduct(refreshItems);

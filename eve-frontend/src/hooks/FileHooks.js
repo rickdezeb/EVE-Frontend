@@ -19,6 +19,7 @@ export const useGetFiles = (page = 0, pageSize = 15, sortByDate = false, isDesce
             setTotalFiles(count);
         } catch (error) {
             console.error(error);
+            throw error;
         } finally {
             setIsLoading(false);
         }
@@ -45,6 +46,7 @@ export const useChangeObjectIdentifier = (refreshItems) => {
         await fileService.changeObjectIdentifier(fileId, newIdentifier);
       } catch (error) {
         console.error(error);
+        throw error;
       } finally {
         setIsLoading(false);
         refreshItems();
@@ -64,6 +66,7 @@ export const useRenameFile = (refreshItems) => {
         }
         catch (error) {
             console.error(error);
+            throw error;
         }
         finally {
             setIsLoading(false)
@@ -88,6 +91,7 @@ export const useDownloadFile = () => {
         window.URL.revokeObjectURL(url);
       } catch (error) {
         console.error("Error downloading file:", error);
+        throw error;
       } finally {
         setIsLoading(false);
       }
@@ -105,6 +109,7 @@ export const useDeleteFile = (refreshItems) => {
         }
         catch (error) {
             console.error(error);
+            throw error;
         }
         finally {
             setIsLoading(false);
@@ -123,6 +128,7 @@ export const useUploadFile = (refreshItems) => {
         }
         catch (error) {
             console.error(error);
+            throw error;
         }
         finally {
             setIsLoading(false)

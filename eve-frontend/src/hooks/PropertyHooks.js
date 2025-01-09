@@ -12,6 +12,7 @@ export const useGetProperties = (productId) => {
             setProperties(data);
         } catch (error) {
             console.error(error);
+            throw error;
         } finally {
             setIsLoading(false);
         }
@@ -37,6 +38,7 @@ export const useUpdateProperty = (refreshItems) => {
             await propertyService.updateProperty(productId, propertyId, value);
         } catch (error) {
             console.error(error);
+            throw error;
         } finally {
             setIsLoading(false);
             refreshItems(); 

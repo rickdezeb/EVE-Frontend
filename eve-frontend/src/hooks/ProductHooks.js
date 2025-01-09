@@ -19,6 +19,7 @@ export const useGetProducts = (fileId, page = 0, pageSize = 15, isDescending = f
             setObjectIdentifier(data.objectIdentifier);
         } catch (error) {
             console.error(error);
+            throw error;
         } finally {
             setIsLoading(false);
         }
@@ -44,6 +45,7 @@ export const useDeleteProduct = (refreshItems) => {
         }
         catch (error) {
             console.error(error);
+            throw error;
         }
         finally {
             setIsLoading(false);
@@ -62,6 +64,7 @@ export const useAddProduct = (refreshItems) => {
         }
         catch (error) {
             console.error(error);
+            throw error;
         }
         finally {
             setIsLoading(false)
