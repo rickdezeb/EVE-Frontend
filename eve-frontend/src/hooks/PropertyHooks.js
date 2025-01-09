@@ -1,5 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import * as propertyService from "../services/PropertyService";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export const useGetProperties = (productId) => {
     const [properties, setProperties] = useState([]);
@@ -12,6 +14,7 @@ export const useGetProperties = (productId) => {
             setProperties(data);
         } catch (error) {
             console.error(error);
+            toast.error("Failed to load properties", { theme: "colored" });
             throw error;
         } finally {
             setIsLoading(false);

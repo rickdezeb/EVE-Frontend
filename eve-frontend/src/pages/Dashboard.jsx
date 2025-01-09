@@ -64,6 +64,7 @@ export default function Dashboard() {
       setSelectedFiles([]);
       setShowDeleteModal(false);
       toast.error("Selected file(s) deleted.", { theme: "colored" });
+      
     } catch (error) {
       console.error(error);
       toast.error("Failed to delete files.", { theme: "colored" });
@@ -90,6 +91,8 @@ export default function Dashboard() {
     } catch (error) {
       console.error(error);
       toast.error("Failed to rename file.", { theme: "colored" });
+      setRenameFileId(null);
+      setRenameFileName("");
     }
   };
 

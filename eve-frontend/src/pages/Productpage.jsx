@@ -79,9 +79,11 @@ export default function ProductPage() {
   const handleIdentifierChange = async (newIdentifier) => {
     try {
       await changeIdentifier(file.id, newIdentifier);
+      toast.success("Object identifier changed successfully.", { theme: "colored" });
       refreshItems();
     } catch (error) {
       console.error(error);
+      toast.error("Failed to change object identifier.", { theme: "colored" });
     } finally {
       setDropdownOpen(false);
     }
@@ -129,9 +131,12 @@ export default function ProductPage() {
 
   const handleDeleteProducts = async () => {
     try {
-      await Promise.all(selectedProducts.map(productId => remove(productId)));
+      await Promise.all(selectedProducts.map(async (productId) => {
+            await remove(productId);
+      }));
       setSelectedProducts([]);
       setShowDeleteModal(false);
+      console.log("refreshing items");
       refreshItems();
       toast.error("Product(s) deleted.", { theme: "colored" });
     } catch (error) {

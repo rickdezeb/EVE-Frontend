@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import * as productService from "../services/ProductService";
 import * as fileService from "../services/FileService";
+import { use } from "react";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export const useGetProducts = (fileId, page = 0, pageSize = 15, isDescending = false) => {
     const [products, setProducts] = useState([]);
@@ -19,6 +22,7 @@ export const useGetProducts = (fileId, page = 0, pageSize = 15, isDescending = f
             setObjectIdentifier(data.objectIdentifier);
         } catch (error) {
             console.error(error);
+            toast.error("Failed to load products", { theme: "colored" });
             throw error;
         } finally {
             setIsLoading(false);
@@ -35,13 +39,13 @@ export const useGetProducts = (fileId, page = 0, pageSize = 15, isDescending = f
 
     return { products, totalProducts, isLoading, objectIdentifier, refreshItems };
 };
-export const useDeleteProduct = (refreshItems) => {
+
+export const useDeleteProduct = () => {
     const [isLoading, setIsLoading] = useState(false);
     const remove = async (id) => {
         try {
             setIsLoading(true);
             await productService.deleteProduct(id);
-            await refreshItems();
         }
         catch (error) {
             console.error(error);
@@ -49,18 +53,20 @@ export const useDeleteProduct = (refreshItems) => {
         }
         finally {
             setIsLoading(false);
+            return;
         }
     }
+
+    
     return { remove, isLoading }; 
 }
 
-export const useAddProduct = (refreshItems) => {
+export const useAddProduct = () => {
     const [isLoading, setIsLoading] = useState(false);
     const add = async (fileId) => {
         try {
             setIsLoading(true);
             await productService.addProduct(fileId);
-            await refreshItems();
         }
         catch (error) {
             console.error(error);

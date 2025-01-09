@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react"
 import * as fileService from '../services/FileService';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export const useGetFiles = (page = 0, pageSize = 15, sortByDate = false, isDescending = false, searchTerm = '') => {
     const [files, setFiles] = useState([]);
@@ -18,7 +20,8 @@ export const useGetFiles = (page = 0, pageSize = 15, sortByDate = false, isDesce
             setFiles(data);
             setTotalFiles(count);
         } catch (error) {
-            console.error(error);
+            console.log(error);
+            toast.error("Failed to load files", { theme: "colored" });
             throw error;
         } finally {
             setIsLoading(false);
@@ -27,7 +30,11 @@ export const useGetFiles = (page = 0, pageSize = 15, sortByDate = false, isDesce
 
     useEffect(() => {
         console.log(`Fetching files for page ${page}`);
-        retrieve();
+        try {
+            retrieve();
+        } catch (error) {
+            console.log(error);
+        }
     }, [refresh, page, sortByDate, isDescending, searchTerm]);
 
     const refreshItems = () => {
