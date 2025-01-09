@@ -9,24 +9,7 @@ import Pagination from '../components/Pagination';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const Property = ({ product, file, currentPage }) => {
-  const navigate = useNavigate();
-  const loadEditPage = () => {
-    navigate("/editpage", { state: { product, file, currentPage } });
-  };
 
-  return (
-    <div>
-      <span
-        onClick={loadEditPage}
-        className="text-primary"
-        style={{ cursor: 'pointer' }}
-      >
-        {product.identifier || "No identifier"}
-      </span>
-    </div>
-  );
-};
 
 export default function ProductPage() {
   const location = useLocation();
@@ -38,7 +21,7 @@ export default function ProductPage() {
   const { products, totalProducts, isLoading: isLoadingProducts, refreshItems, objectIdentifier } = useGetProducts(file?.id, currentPage - 1, itemsPerPage, isDescending);
   const [selectedIdentifier, setSelectedIdentifier] = useState(objectIdentifier);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null); // Ref for the dropdown
+  const dropdownRef = useRef(null); 
   const { changeIdentifier, isLoading } = useChangeObjectIdentifier(() => {});
 
   const { remove, isLoading: isLoadingDelete } = useDeleteProduct(refreshItems);
@@ -50,6 +33,26 @@ export default function ProductPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [renameFileName, setRenameFileName] = useState(localStorage.getItem(`fileName-${file?.id}`) || file?.name);
   const [isRenaming, setIsRenaming] = useState(false);
+
+  const Property = ({ product, file, indexation }) => {
+    const navigate = useNavigate();
+    const handleLoadingEditPage = () => {
+      setCurrentPage(indexation);
+      navigate("/editpage", { state: { product, file, indexation } });
+    };
+  
+    return (
+      <div>
+        <span
+          onClick={handleLoadingEditPage}
+          className="text-primary"
+          style={{ cursor: 'pointer' }}
+        >
+          {product.identifier || "No identifier"}
+        </span>
+      </div>
+    );
+  };
 
   useEffect(() => {
     setRenameFileName(localStorage.getItem(`fileName-${file?.id}`) || file?.name);
@@ -252,7 +255,7 @@ export default function ProductPage() {
               {products.length > 0 ? products.map((product, index) => (
                 <tr key={product.id}>
                   <td><input type="checkbox" className="me-2" checked={selectedProducts.includes(product.id)} onChange={() => handleSelectProduct(product.id)} /> </td>
-                  <td><Property product={product} file={file} currentPage={currentPage} /></td>
+                  <td><Property product={product} file={file} currentPage={currentPage} indexation={index} /></td>
                   <td>{new Date(product.lastUpdated).toLocaleString()}</td>
                 </tr>
               )) : (
