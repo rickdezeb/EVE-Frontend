@@ -32,7 +32,7 @@ export const useGetProperties = (productId) => {
     return { properties, isLoading, refreshItems };
 };
 
-export const useUpdateProperty = (refreshItems) => {
+export const useUpdateProperty = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     const update = async (productId, propertyId, value) => {
@@ -43,8 +43,7 @@ export const useUpdateProperty = (refreshItems) => {
             console.error(error);
             throw error;
         } finally {
-            setIsLoading(false);
-            refreshItems(); 
+            setIsLoading(false); 
         }
     };
 

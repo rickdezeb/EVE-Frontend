@@ -62,9 +62,11 @@ function Editpage() {
     try {
       await Promise.all(updatePromises);
       toast.success("Properties updated successfully.", { theme: "colored" });
+      refreshItems();
     } catch (error) {
       console.error(error);
       toast.error("Failed to update properties.", { theme: "colored" });
+      refreshItems();
     }
   };
 
