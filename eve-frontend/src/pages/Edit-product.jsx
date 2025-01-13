@@ -22,7 +22,7 @@ function Editpage() {
 
   const [selectedProductId, setSelectedProductId] = useState(product.id);
   const { properties, isLoading: isLoadingProperties, refreshItems } = useGetProperties(selectedProductId);
-  const { update, isLoading: isLoadingUpdate } = useUpdateProperty(refreshItems);
+  const { update, isLoading: isLoadingUpdate } = useUpdateProperty();
   const { products, totalProducts, isLoading: isLoadingProducts} = useGetProducts(file.id, currentPage - 1, itemsPerPage, isDescending);
 
   const [localProperties, setLocalProperties] = useState(properties);
@@ -45,28 +45,42 @@ function Editpage() {
     if (selectedProduct) {
       setCurrentProduct(selectedProduct);
     }
+    
   }, [products]);
 
   const handleInputChange = (index, event) => {
-    const newProperties = [...properties];
+    const newProperties = [...localProperties];
     newProperties[index].value = event.target.value;
-    console.log(newProperties);
     setLocalProperties(newProperties);
   };
 
   const handleSave = async () => {
-    const updatePromises = localProperties.map(property =>
+    console.log("Properties:", properties);
+    console.log("Local Properties:", localProperties);
+  
+    const newLocalUpdates = localProperties.filter((localProp, index) => {
+      const isChanged = localProp.value !== properties[index].value;
+      if (isChanged) {
+        console.log("Changed property detected:", localProp);
+      }
+      return isChanged;
+    });
+  
+    console.log("New Local Updates:", newLocalUpdates);
+  
+    const updatePromises = newLocalUpdates.map(property =>
+      console.log("Updating property", property) ||
       update(selectedProductId, property.id, property.value)
     );
-
+  
     try {
       await Promise.all(updatePromises);
       toast.success("Properties updated successfully.", { theme: "colored" });
       refreshItems();
+      setLocalProperties(properties);
     } catch (error) {
       console.error(error);
       toast.error("Failed to update properties.", { theme: "colored" });
-      refreshItems();
     }
   };
 
@@ -136,7 +150,7 @@ function Editpage() {
   return (
     <div className="d-flex flex-column">
       <main className="container flex-fill">
-        <h2 className="text-start">ID: {currentProduct ? currentProduct.id : 'Laden...'}</h2>
+        <h2 className="text-start">ID: {products ? products[0].id : 'Laden...'}</h2>
         <div className="card mb-3">
           <div className="card-body overflow-auto" style={{ maxHeight: '75vh', minHeight: '75vh' }}>
             {isLoadingProperties ? (
