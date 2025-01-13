@@ -93,7 +93,11 @@ export const useDownloadFile = () => {
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = `${fileName}`;
+        if (fileName.endsWith(".xlsx")) {
+            link.download = `${fileName}`;
+        } else {
+            link.download = `${fileName + ".xlsx"}`;
+        }
         link.click();
         window.URL.revokeObjectURL(url);
       } catch (error) {
